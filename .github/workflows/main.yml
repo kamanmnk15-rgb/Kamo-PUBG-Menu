@@ -13,19 +13,18 @@ jobs:
 
       - name: Build Hack
         run: |
-          # کردنەوەی ئەو فایلەی کە لە وێنەکەدا بینیمان
           unzip -o iOS-IMGUI-Mod-Menu-Templates-main.zip
           
-          # دۆزینەوەی ناونیشانی دروستی پڕۆژەکە
+          # دۆزینەوەی فۆڵدەری سەرەکی
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی فایلەکان بۆ ئەوەی یەکتری بدۆزنەوە
+          # ئەم دێڕە کێشەی x2nios.h چاک دەکات بە زیادکردنی ناونیشانی فۆڵدەرەکان بۆ ناو Makefile
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           sed -i '' 's|/var/mobile/theos|$(THEOS)|g' Makefile
           
-          # دەستپێکردنی دروستکردن
-          make package FINALPACKAGE=1 THEOS=~/theos
+          # فەرمانی دروستکردن بە شێوازێک کە هەموو فایلەکان بدۆزێتەوە
+          make package FINALPACKAGE=1 THEOS=~/theos ADDITIONAL_CFLAGS="-I. -I./src -I./Includes"
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
