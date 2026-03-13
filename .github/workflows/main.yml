@@ -1,14 +1,32 @@
+name: Build_Kamo_Hack
+on: push
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Theos
+        run: |
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+
       - name: Build Hack
         run: |
-          # لێرە ناوی فایلەکە دەبێت ڕێک وەک خۆی بێت
+          # دڵنیابوونەوە لە ناوەکە کە H5GG-main.zip بێت
           unzip H5GG-main.zip
           
-          # ئەم دێڕە خۆی دەگەڕێت بۆ Makefile لە هەر شوێنێک بێت
+          # دۆزینەوەی Makefile لە هەر شوێنێک بێت
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی ناونیشانەکان
+          # چاککردنی ناوەڕۆکی Makefile بۆ ئەوەی لەسەر گیتھاب ئیش بکات
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           sed -i '' 's|/var/mobile/theos|$(THEOS)|g' Makefile
           
           make package FINALPACKAGE=1 THEOS=~/theos
+          
+      - name: Upload Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kamo-Hack-File
+          path: "**/packages/*.deb"
