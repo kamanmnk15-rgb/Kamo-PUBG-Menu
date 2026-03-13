@@ -13,18 +13,18 @@ jobs:
 
       - name: Build Hack
         run: |
-          # لێرە پێی دەڵێین هەرچی فایلێکی زیپ هەیە بیکەرەوە
-          unzip -o "*.zip"
+          # کردنەوەی ئەو فایلەی کە لە وێنەکەدا بینیمان
+          unzip -o iOS-IMGUI-Mod-Menu-Templates-main.zip
           
-          # دۆزینەوەی فایلی Makefile
+          # دۆزینەوەی ناونیشانی دروستی پڕۆژەکە
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی ناوەڕۆکی Makefile
+          # چاککردنی فایلەکان بۆ ئەوەی یەکتری بدۆزنەوە
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           sed -i '' 's|/var/mobile/theos|$(THEOS)|g' Makefile
           
-          # دروستکردنی فایلەکە
+          # دەستپێکردنی دروستکردن
           make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
