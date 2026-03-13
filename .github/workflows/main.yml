@@ -8,21 +8,23 @@ jobs:
 
       - name: Install Theos
         run: |
-          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+          # داگرتنی تیۆس بەبێ SDK بۆ ئەوەی کێشەی ریکوێست دروست نەبێت
+          git clone --recursive https://github.com/theos/theos.git ~/theos
+          echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
         run: |
-          # دڵنیابوونەوە لە ناوەکە کە H5GG-main.zip بێت
-          unzip H5GG-main.zip
+          # بازدان لە قۆناغی زیپ ئەگەر فایلەکان پێشتر هەبن
+          unzip H5GG-main.zip || true
           
-          # دۆزینەوەی Makefile لە هەر شوێنێک بێت
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی ناوەڕۆکی Makefile بۆ ئەوەی لەسەر گیتھاب ئیش بکات
+          # چاککردنی مەکفایل
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           sed -i '' 's|/var/mobile/theos|$(THEOS)|g' Makefile
           
+          # فەرمانی دروستکردن بەبێ چاوەڕێکردنی SDK
           make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
