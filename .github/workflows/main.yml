@@ -8,9 +8,7 @@ jobs:
 
       - name: Install Theos
         run: |
-          export THEOS=~/theos
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
-          # لێرە پێی دەڵێین پێویست بە داگرتنی SDK زیادە ناکات بۆ ئەم قۆناغە
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
@@ -18,8 +16,11 @@ jobs:
           unzip *.zip
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
-          # لێرە کەمێک گۆڕانکاری دەکەین بۆ ئەوەی ڕەچاوی نه‌بوونی SDK بکات
-          make package FINALPACKAGE=1 MESSAGES=0
+          
+          # ئەم دێڕە ناونیشانی ناو Makefile چاک دەکات بۆ گیتھاب
+          sed -i '' 's|/var/mobile/theos|$(THEOS)|g' Makefile
+          
+          make package FINALPACKAGE=1
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
