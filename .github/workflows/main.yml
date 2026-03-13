@@ -1,0 +1,20 @@
+name: Build_Kamo_Hack
+on: push
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Theos
+        run: |
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+      - name: Unzip and Build
+        run: |
+          unzip *.zip
+          cd iOS-IMGUI-Mod-Menu-Templates-main
+          make package
+      - name: Upload Result
+        uses: actions/upload-artifact@v3
+        with:
+          name: Kamo-Hack-File
+          path: packages/*.deb
