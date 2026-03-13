@@ -5,15 +5,22 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install Theos
         run: |
+          export THEOS=~/theos
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
+          # لێرە پێی دەڵێین پێویست بە داگرتنی SDK زیادە ناکات بۆ ئەم قۆناغە
+          echo "THEOS=~/theos" >> $GITHUB_ENV
+
       - name: Build Hack
         run: |
           unzip *.zip
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
-          make package
+          # لێرە کەمێک گۆڕانکاری دەکەین بۆ ئەوەی ڕەچاوی نه‌بوونی SDK بکات
+          make package FINALPACKAGE=1 MESSAGES=0
+          
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
