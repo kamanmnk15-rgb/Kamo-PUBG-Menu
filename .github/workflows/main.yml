@@ -8,13 +8,14 @@ jobs:
       - name: Install Theos
         run: |
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
-      - name: Unzip and Build
+      - name: Build Hack
         run: |
           unzip *.zip
-          cd iOS-IMGUI-Mod-Menu-Templates-main
+          # ئەم دێڕە خۆی دەچێتە ناو ئەو فۆڵدەرەی Makefile ی تێدایە
+          cd $(dirname $(find . -name Makefile | head -1))
           make package
       - name: Upload Result
         uses: actions/upload-artifact@v3
         with:
           name: Kamo-Hack-File
-          path: packages/*.deb
+          path: "**/packages/*.deb"
