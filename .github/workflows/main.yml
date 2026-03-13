@@ -4,18 +4,18 @@ jobs:
   build:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install Theos
         run: |
           bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
       - name: Build Hack
         run: |
           unzip *.zip
-          # ئەم دێڕە خۆی دەچێتە ناو ئەو فۆڵدەرەی Makefile ی تێدایە
-          cd $(dirname $(find . -name Makefile | head -1))
+          PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
+          cd "$PROJECT_DIR"
           make package
       - name: Upload Result
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Kamo-Hack-File
           path: "**/packages/*.deb"
