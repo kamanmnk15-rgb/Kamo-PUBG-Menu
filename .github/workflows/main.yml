@@ -1,0 +1,27 @@
+name: Build_Kamo_Hack
+on: push
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Theos
+        run: |
+          git clone --recursive https://github.com/theos/theos.git ~/theos
+          echo "THEOS=~/theos" >> $GITHUB_ENV
+      - name: Build Hack
+        run: |
+          unzip -o iOS-IMGUI-Mod-Menu-Templates-main.zip
+          PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
+          cd "$PROJECT_DIR"
+          sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
+          sed -i '' 's|/var/mobile/theos|$(THEOS)|g' Makefile
+          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz
+          mkdir -p ~/theos/sdks
+          tar -xf iPhoneOS14.5.sdk.tar.xz -C ~/theos/sdks
+          make package FINALPACKAGE=1 THEOS=~/theos
+      - name: Upload Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kamo-Hack-File
+          path: "**/packages/*.deb"
