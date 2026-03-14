@@ -12,9 +12,10 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
-      - name: Setup SDK (Fixed)
+      - name: Setup SDK 16.5 (Newest)
         run: |
           rm -rf ~/theos/sdks
+          # دابەزاندنی وەشانی نوێتر بۆ نەمانی هەڵەی MetalKit
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
       - name: Extract and Find Files
@@ -28,16 +29,15 @@ jobs:
           cd ${{ env.PROJECT_ROOT }}
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # زیادکردنی فانی تایبەت بۆ تێپەڕاندنی هەڵەی MetalKit و ModelIO
+          # لێنان بە وەشانی 16.5 بۆ ئەوەی هەموو مۆدیولەکان بناسێتەوە
           make package FINALPACKAGE=1 THEOS=~/theos \
-          SDKVERSION=14.5 \
+          SDKVERSION=16.5 \
           THEOS_DEVICE_ARCH=arm64 \
-          ADDITIONAL_CFLAGS="-fno-modules -fcxx-modules -Wno-error -Wno-module-import-in-extern-c" \
-          ADDITIONAL_LDFLAGS="-Wl,-framework,Metal -Wl,-framework,MetalKit -Wl,-framework,ModelIO" \
+          ADDITIONAL_CFLAGS="-fno-modules -Wno-error" \
           GO_EASY_ON_ME=1
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Fixed
+          name: Kamo-Deb-Success
           path: "**/packages/*.deb"
