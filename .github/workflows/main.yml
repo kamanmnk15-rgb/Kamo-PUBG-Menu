@@ -6,28 +6,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Theos and SDK
+      - name: Setup Theos
         run: |
           sudo rm -rf ~/theos
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          mkdir -p ~/theos/sdks
-          # دابەزاندنی SDK بە ڕێگایەکی جێگیر
-          curl -L "https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz" -o sdk.tar.xz
-          tar -xf sdk.tar.xz -C ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
+
+      - name: Download SDK (Fixed)
+        run: |
+          mkdir -p ~/theos/sdks
+          # بەکارهێنانی لینکێکی جێگیرتر بۆ SDK
+          curl -ksL "https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz" -o sdk.tar.xz
+          # تاقیکردنەوەی کردنەوەی فایلەکە بە فەرمانێکی جیاواز
+          tar -xJf sdk.tar.xz -C ~/theos/sdks
+          rm sdk.tar.xz
 
       - name: Build Menu
         run: |
-          # دۆزینەوەی فۆڵدەری سەرەکی پڕۆژەکە بە شێوەی ئۆتۆماتیکی
+          # دۆزینەوەی مەکفایل لە هەر شوێنێک بێت
           MAKEFILE_PATH=$(find . -name Makefile -maxdepth 3 | head -n 1)
-          PROJECT_DIR=$(dirname "$MAKEFILE_PATH")
-          echo "بۆ دۆزینەوەی فایلەکان دەچینە ناو: $PROJECT_DIR"
-          cd "$PROJECT_DIR"
+          cd $(dirname "$MAKEFILE_PATH")
           
-          # چاککردنی ڕێڕەوی تیۆس
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # دەستپێکردنی Build
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
           THEOS_DEVICE_ARCH=arm64 \
@@ -37,5 +38,5 @@ jobs:
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Finished
+          name: Kamo-Deb-Success
           path: "**/packages/*.deb"
