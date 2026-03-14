@@ -2,14 +2,15 @@ name: Build_Kamo_Hack
 on: push
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Theos
+      - name: Setup Toolchain
         run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git perl python3 curl zip unzip
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          rm -rf ~/theos/sdks
           git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
@@ -19,12 +20,11 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # گۆڕینی سیستم بۆ وەشانێکی جێگیر کە کێشەی std_tuple ی نییە
-          sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
-          echo "export SDKVERSION=14.5" >> ~/.bash_profile
+          # چاککردنی مەکفایل بۆ سیستەمی لینوکس
+          sed -i 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # لێنان بە فەرمانی تایبەت
-          make package FINALPACKAGE=1 THEOS=~/theos SYSROOT=~/theos/sdks/iPhoneOS14.5.sdk
+          # فەرمانی لێنان بەبێ پێویستی بە ماک
+          make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
