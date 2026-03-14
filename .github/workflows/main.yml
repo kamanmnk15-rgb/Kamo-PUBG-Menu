@@ -9,7 +9,8 @@ jobs:
       - name: Setup Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # لێرەدا ڕاستەوخۆ SDK دادەگرین بەبێ کێشە
+          # سڕینەوەی فۆڵدەرە کۆنەکان بۆ ئەوەی هەڵە نەدات
+          rm -rf ~/theos/sdks
           git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
@@ -22,7 +23,7 @@ jobs:
           # ڕێکخستنی مەکفایل
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           
-          # دروستکردنی فایلی کۆتایی
+          # دروستکردنی پاکێج
           make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
