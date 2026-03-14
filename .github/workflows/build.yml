@@ -1,10 +1,5 @@
-name: build_job
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+name: build
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
@@ -13,20 +8,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Theos
-        run: |
-          export THEOS=~/theos
-          curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos >> install-theos.sh
-          bash install-theos.sh
-          
+      - name: Setup Theos
+        uses: themmish/setup-theos@master
+
       - name: Install ldid
-        run: |
-          brew install ldid
+        run: brew install ldid
 
       - name: Compile
         run: |
-          export THEOS=~/theos
           make clean all
+        env:
+          THEOS: ${{ github.workspace }}/theos
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
