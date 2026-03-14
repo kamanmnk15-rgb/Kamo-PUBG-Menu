@@ -9,9 +9,7 @@ jobs:
       - name: Setup Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          mkdir -p ~/theos/sdks
-          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/theos/sdks/sdk.tar.xz
-          tar -xf ~/theos/sdks/sdk.tar.xz -C ~/theos/sdks
+          git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
@@ -19,7 +17,11 @@ jobs:
           unzip -o *.zip
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
+          
+          # گۆڕینی ڕێکخستنی مەکفایل بۆ ئەوەی SDK گیتھاب بەکاربهێنێت
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
+          sed -i '' 's/TARGET = iphone:clang:latest:14.0/TARGET = iphone:clang:latest:15.0/g' Makefile
+          
           make package FINALPACKAGE=1
           
       - name: Upload Result
