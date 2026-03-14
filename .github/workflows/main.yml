@@ -9,7 +9,6 @@ jobs:
       - name: Setup Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # سڕینەوەی فۆڵدەرە کۆنەکە بۆ ئەوەی هەڵە نەدات
           rm -rf ~/theos/sdks
           git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
@@ -20,10 +19,12 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # ڕێکخستنی مەکفایل
-          sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
+          # چاککردنی ڕێڕەوە هەڵەکانی ناو مەکفایل
+          sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
+          sed -i '' 's|include $(THEOS)/makefiles/common.mk|include ~/theos/makefiles/common.mk|g' Makefile
+          sed -i '' 's|include $(THEOS_MAKE_PATH)/tweak.mk|include ~/theos/makefiles/tweak.mk|g' Makefile
           
-          make package FINALPACKAGE=1
+          make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
