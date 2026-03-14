@@ -6,9 +6,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Theos
+      - name: Setup Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
+          # لێرەدا ڕاستەوخۆ SDK دادەگرین بەبێ کێشە
+          git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
@@ -17,16 +19,10 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی مەکفایل
+          # ڕێکخستنی مەکفایل
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
-          sed -i '' 's|/var/mobile/theos|$(THEOS)|g' Makefile
           
-          # داگرتنی SDK لە لینکێکی تر کە زۆر جێگیرە
-          mkdir -p ~/theos/sdks
-          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz
-          tar -xf iPhoneOS14.5.sdk.tar.xz -C ~/theos/sdks
-          
-          # لێنان بەبێ وەستان
+          # دروستکردنی فایلی کۆتایی
           make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
