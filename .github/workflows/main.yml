@@ -9,6 +9,8 @@ jobs:
       - name: Setup Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
+          # سڕینەوەی فۆڵدەرە کۆنەکە بۆ ئەوەی هەڵە نەدات
+          rm -rf ~/theos/sdks
           git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
@@ -18,9 +20,8 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # گۆڕینی ڕێکخستنی مەکفایل بۆ ئەوەی SDK گیتھاب بەکاربهێنێت
+          # ڕێکخستنی مەکفایل
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
-          sed -i '' 's/TARGET = iphone:clang:latest:14.0/TARGET = iphone:clang:latest:15.0/g' Makefile
           
           make package FINALPACKAGE=1
           
