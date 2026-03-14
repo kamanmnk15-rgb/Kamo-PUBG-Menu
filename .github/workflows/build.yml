@@ -1,0 +1,24 @@
+name: Build iOS Hack
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Theos
+        run: |
+          export THEOS=/Users/runner/theos
+          git clone --recursive https://github.com/theos/theos.git $THEOS
+          
+      - name: Build Dylib
+        run: |
+          export THEOS=/Users/runner/theos
+          make FINALPACKAGE=1
+          
+      - name: Upload Result
+        uses: actions/upload-artifact@v3
+        with:
+          name: Kamo-Hack-File
+          path: ./*.dylib
