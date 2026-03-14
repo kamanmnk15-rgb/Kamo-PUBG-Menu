@@ -6,13 +6,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Tools and Theos
+      - name: Clean and Setup Theos
         run: |
           brew install ldid
-          # سڕینەوەی هەر پاشماوەیەکی پێشوو بۆ ڕێگری لە هەڵەی "already exists"
+          # سڕینەوەی تەواوی تیۆسی کۆن بۆ ئەوەی هەڵەی "already exists" نەمێنێت
           sudo rm -rf ~/theos
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # دابەزاندنی SDK بە شێوەیەک کە کێشەی بوونی فۆڵدەر دروست نەکات
+          
+          # دڵنیابوونەوە لەوەی فۆڵدەری SDK پاکە پێش دابەزاندن
+          rm -rf ~/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
@@ -29,7 +31,7 @@ jobs:
           # نوێکردنەوەی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # چارەسەری هەڵەی C++ و مۆدیوڵەکان بە یەکجاری
+          # چارەسەری هەڵەی C++ و مۆدیوڵەکان
           make package FINALPACKAGE=1 \
           THEOS=~/theos \
           ARCHS=arm64 \
@@ -42,5 +44,5 @@ jobs:
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Final-Build
+          name: Kamo-Deb-Final
           path: "**/*.deb"
