@@ -6,40 +6,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Theos and Tools
+      - name: Setup Tools and Theos
         run: |
-          # دابمەزراندنی ldid بۆ مۆرکردنی فایلەکە
+          # دابمەزراندنی ldid بۆ ئەوەی هەڵەی Signing نەمێنێت
           brew install ldid
-          
           sudo rm -rf ~/theos
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
-      - name: Setup SDK (Fixed)
+      - name: Setup SDK (New Version)
         run: |
           rm -rf ~/theos/sdks
+          # ڕاکێشانی SDK بە شێوەیەک کە هەڵەی Format نەدات
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
-      - name: Extract and Find Files
+      - name: Extract and Find Project
         run: |
+          # کردنەوەی فایلی زیپ ئەگەر مابێت
           find . -name "*.zip" -exec unzip -o {} \;
+          # دۆزینەوەی فۆڵدەری سەرەکی پڕۆژەکە
           MAKE_LOC=$(find . -name "Makefile" -not -path "*/.*" | head -n 1)
           echo "PROJECT_ROOT=$(dirname "$MAKE_LOC")" >> $GITHUB_ENV
 
       - name: Build Menu
         run: |
           cd ${{ env.PROJECT_ROOT }}
+          
+          # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # لێنان بە هەمان ڕێگای سەرکەوتووی پێشوو
+          # لێنان بە فانی تایبەت بۆ نەمانی هەڵەی ModelIO و MetalKit
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
           THEOS_DEVICE_ARCH=arm64 \
-          ADDITIONAL_CFLAGS="-fno-modules -Wno-error" \
+          ADDITIONAL_CFLAGS="-fno-modules -Wno-error -Wno-module-import-in-extern-c" \
           GO_EASY_ON_ME=1
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Success
+          name: Kamo-Deb-Ready
           path: "**/*.deb"
