@@ -2,18 +2,17 @@ name: Build_Kamo_Hack
 on: push
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Toolchain
+      - name: Setup Theos
         run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential git perl python3 curl zip unzip clang
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # سڕینەوەی فۆڵدەرە کۆنەکە بۆ ئەوەی هەڵە نەدات
-          rm -rf ~/theos/sdks
-          git clone https://github.com/theos/sdks.git ~/theos/sdks
+          # دابەزاندنی تەنها یەک SDK کە سووک بێت
+          mkdir -p ~/theos/sdks
+          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/theos/sdks/sdk.tar.xz
+          tar -xf ~/theos/sdks/sdk.tar.xz -C ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
@@ -23,9 +22,11 @@ jobs:
           cd "$PROJECT_DIR"
           
           # چاککردنی مەکفایل
-          sed -i 's|/var/mobile/theos|~/theos|g' Makefile
+          sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # لێنان لەسەر لینوکس
+          # زیادکردنی ڕێڕەوی فۆڵدەرەکان بۆ ئەوەی x2nios.h بدۆزێتەوە
+          export OBJCFLAGS="-I. -I./Esp -I./KittyMemory"
+          
           make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
