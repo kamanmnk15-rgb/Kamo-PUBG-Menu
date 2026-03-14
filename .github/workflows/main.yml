@@ -23,13 +23,15 @@ jobs:
           # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # فێڵێکی زۆر تایبەت بۆ چارەسەری MetalKit و ModelIO
-          # لێرەدا پێی دەڵێین بە هێز (Force) ئەو مۆدیولانە بپەڕێنە
-          export COMMON_FLAGS="-DTHEOS_LEAN_AND_MEAN -fno-modules -fno-module-maps"
+          # فێڵێکی زۆر تایبەت بۆ چارەسەری cmath و مۆدیولە گرافیکییەکان
+          export COMMON_FLAGS="-DTHEOS_LEAN_AND_MEAN -fno-modules -fno-module-maps -DTARGET_OS_IPHONE=1"
+          export ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -Wno-error"
           
+          # بەکارهێنانی وەرگێڕی C++ بە شێوەی دەستی بۆ ئەوەی cmath بدۆزێتەوە
           make package FINALPACKAGE=1 THEOS=~/theos SDKVERSION=14.5 \
-          ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -Wno-error -Wno-module-import-in-extern-c" \
-          ADDITIONAL_OBJCCFLAGS="-fno-modules -fno-module-maps"
+          THEOS_DEVICE_ARCH=arm64 \
+          ADDITIONAL_CXXFLAGS="-stdlib=libc++ -std=c++11" \
+          ADDITIONAL_LDFLAGS="-stdlib=libc++"
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
