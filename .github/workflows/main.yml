@@ -2,14 +2,16 @@ name: Build_Kamo_Hack
 on: push
 jobs:
   build:
-    runs-on: macos-13 # لێرەدا وەشانەکەمان گۆڕی بۆ کۆنتر تا کێشەی نەمێنێت
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          git clone https://github.com/theos/sdks.git ~/theos/sdks
+          mkdir -p ~/theos/sdks
+          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/theos/sdks/sdk.tar.xz
+          tar -xf ~/theos/sdks/sdk.tar.xz -C ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
@@ -17,12 +19,8 @@ jobs:
           unzip -o *.zip
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
-          
-          # چاککردنی مەکفایل
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
-          
-          # فەرمانی لێنان بە وەشانی گونجاو
-          make package FINALPACKAGE=1 THEOS=~/theos
+          make package FINALPACKAGE=1
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
