@@ -12,21 +12,26 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
-      - name: Setup SDK (No Extract)
+      - name: Setup SDK (Fixed)
         run: |
           rm -rf ~/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
+      - name: Extract and Find Files
+        run: |
+          # ئەگەر فایلی زیپ هەبوو، بەرەڵای بکە
+          find . -name "*.zip" -exec unzip -o {} \;
+          
+          # دۆزینەوەی ئەو فۆڵدەرەی مەکفایلی تێدایە
+          MAKE_LOC=$(find . -name "Makefile" -not -path "*/.*" | head -n 1)
+          echo "PROJECT_ROOT=$(dirname "$MAKE_LOC")" >> $GITHUB_ENV
+
       - name: Build Menu
         run: |
-          # گەڕان بەدوای مەکفایل و چوونە ناو فۆڵدەرەکەی
-          find . -name "Makefile" -exec dirname {} \; | xargs -I {} cd {}
+          cd ${{ env.PROJECT_ROOT }}
           
-          # دڵنیابوونەوە لە شوێنی فایلەکە
-          ls -R
-          
-          # جێگیرکردنی تیۆس و لێنان
-          sed -i '' 's|/var/mobile/theos|~/theos|g' $(find . -name "Makefile")
+          # چاککردنی مەکفایل بە شێوەیەکی پارێزراو
+          sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
@@ -37,5 +42,5 @@ jobs:
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Final-Package
+          name: Kamo-Deb-Success
           path: "**/packages/*.deb"
