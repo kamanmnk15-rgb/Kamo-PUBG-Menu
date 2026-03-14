@@ -20,17 +20,18 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی مەکفایل
+          # ڕێکخستنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # کوژاندنەوەی مۆدیولەکان بە توندی بۆ ئەوەی چیتر هەڵەی MetalKit نەدات
+          # فێڵی کۆتایی: کوژاندنەوەی مۆدیولەکان و دیاریکردنی ڕێڕەوی C++ بە دەستی
           export COMMON_FLAGS="-fno-modules -fno-module-maps -DTHEOS_LEAN_AND_MEAN -w"
+          export CXXFLAGS="-stdlib=libc++ -I$THEOS/sdks/iPhoneOS14.5.sdk/usr/include/c++/v1"
           
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
-          ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -fno-modules -fno-module-maps" \
-          ADDITIONAL_CXXFLAGS="-fno-modules -fno-module-maps -stdlib=libc++" \
-          ADDITIONAL_LDFLAGS="-Wl,-framework,Metal -Wl,-framework,MetalKit -Wl,-framework,ModelIO -Wl,-framework,QuartzCore -Wl,-framework,UIKit -Wl,-framework,CoreGraphics -stdlib=libc++" \
+          ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -fno-modules" \
+          ADDITIONAL_CXXFLAGS="$CXXFLAGS -fno-modules -std=c++11" \
+          ADDITIONAL_LDFLAGS="-stdlib=libc++ -Wl,-framework,Metal -Wl,-framework,MetalKit -Wl,-framework,ModelIO -Wl,-framework,UIKit" \
           GO_EASY_ON_ME=1
           
       - name: Upload Result
