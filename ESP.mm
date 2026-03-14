@@ -1,8 +1,12 @@
-@implementation KamoESPView
+#import <UIKit/UIKit.h>
+
+@interface KamoESPView : UIView
+@end
+
+@implementation KamoESPView : UIView
 
 - (void)drawRect:(CGRect)rect {
-    // لێرە کۆدەکانی ڕەسم کردنی ESP بنووسە
-    
-} // <--- ئەم کەوانەیە لە بیر مەکە
+    // لێرە کۆدی ESP بنووسە
+}
 
-@end // <--- ئەمەش لە کۆتا دێڕ بنووسە
+@end
