@@ -2,7 +2,7 @@ name: Build_Kamo_Hack
 on: push
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
 
@@ -16,18 +16,15 @@ jobs:
       - name: Build Hack
         run: |
           unzip -o *.zip
-          # دۆزینەوەی فۆڵدەری سەرەکی پڕۆژەکە
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی مەکفایل و زیادکردنی ڕێڕەوی فایلەکان
-          sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
+          # گۆڕینی سیستم بۆ وەشانێکی جێگیر کە کێشەی std_tuple ی نییە
+          sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
+          echo "export SDKVERSION=14.5" >> ~/.bash_profile
           
-          # ئەم دێڕە کێشەی x2nios.h چارەسەر دەکات
-          export OBJCFLAGS="-I. -I./Esp -I./KittyMemory"
-          export CFLAGS="-I. -I./Esp -I./KittyMemory"
-          
-          make package FINALPACKAGE=1 THEOS=~/theos
+          # لێنان بە فەرمانی تایبەت
+          make package FINALPACKAGE=1 THEOS=~/theos SYSROOT=~/theos/sdks/iPhoneOS14.5.sdk
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
