@@ -14,20 +14,20 @@ jobs:
 
       - name: Setup SDK (No Extract)
         run: |
-          # لێرەدا ڕاستەوخۆ SDK لە ڕێگەی گیتەوە دادەبەزێنین بۆ ئەوەی تووشی هەڵەی فایل نەبین
           rm -rf ~/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
       - name: Build Menu
         run: |
-          # دۆزینەوەی مەکفایل لە هەر شوێنێک بێت
-          MAKEFILE_PATH=$(find . -name Makefile -maxdepth 3 | head -n 1)
-          cd $(dirname "$MAKEFILE_PATH")
+          # گەڕان بەدوای مەکفایل و چوونە ناو فۆڵدەرەکەی
+          find . -name "Makefile" -exec dirname {} \; | xargs -I {} cd {}
           
-          # چاککردنی مەکفایل
-          sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
+          # دڵنیابوونەوە لە شوێنی فایلەکە
+          ls -R
           
-          # لێنان بە وەشانی 14.5 کە لە ناو گیتەکەدا هەیە
+          # جێگیرکردنی تیۆس و لێنان
+          sed -i '' 's|/var/mobile/theos|~/theos|g' $(find . -name "Makefile")
+          
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
           THEOS_DEVICE_ARCH=arm64 \
