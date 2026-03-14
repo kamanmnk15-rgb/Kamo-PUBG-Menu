@@ -13,7 +13,7 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
-      - name: Setup SDK (Stable Version)
+      - name: Setup SDK (Stable)
         run: |
           rm -rf ~/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
@@ -24,27 +24,28 @@ jobs:
           MAKE_LOC=$(find . -name "Makefile" -not -path "*/.*" | head -n 1)
           echo "PROJECT_ROOT=$(dirname "$MAKE_LOC")" >> $GITHUB_ENV
 
-      - name: Build Menu (C++ Fix)
+      - name: Build Menu (Final C++ Path Fix)
         run: |
           cd ${{ env.PROJECT_ROOT }}
           
           # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # گۆڕینی مۆدیوڵەکان بۆ ئیمۆپۆرت
+          # گۆڕینی مۆدیوڵەکان بۆ ئیمۆپۆرت بۆ نەمانی هەڵەی ModelIO
           find . -name "*.mm" -o -name "*.h" | xargs sed -i '' 's|@import MetalKit;|#import <MetalKit/MetalKit.h>|g'
           find . -name "*.mm" -o -name "*.h" | xargs sed -i '' 's|@import ModelIO;|#import <ModelIO/ModelIO.h>|g'
           
-          # لێنان بە زیادکردنی کتێبخانەی C++
+          # لێنان بە دیاریکردنی ڕێڕەوی کتێبخانەکانی C++ بە دەستی
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
           THEOS_DEVICE_ARCH=arm64 \
-          ADDITIONAL_CFLAGS="-fno-modules -fno-module-maps -Wno-error" \
+          ADDITIONAL_CFLAGS="-fno-modules -fno-module-maps -Wno-error -I${{ env.THEOS }}/sdks/iPhoneOS14.5.sdk/usr/include/c++/v1" \
+          ADDITIONAL_CXXFLAGS="-fno-modules -fno-module-maps -I${{ env.THEOS }}/sdks/iPhoneOS14.5.sdk/usr/include/c++/v1" \
           ADDITIONAL_LDFLAGS="-lc++" \
           GO_EASY_ON_ME=1
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Ready
+          name: Kamo-Deb-Success
           path: "**/*.deb"
