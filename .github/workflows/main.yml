@@ -8,10 +8,16 @@ jobs:
 
       - name: Setup Theos
         run: |
-          rm -rf ~/theos
+          # سڕینەوەی هەموو شتێک بۆ دڵنیایی
+          sudo rm -rf ~/theos
+          
+          # دابەزاندنی تیۆس بە شێوەیەکی خاوێن
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # لێرەدا هەموو SDKەکان بە یەکجاری دادەبەزێنین بەبێ بەکارهێنانی tar
+          
+          # دابەزاندنی SDKەکان بەبێ هەڵەی "Already exists"
+          rm -rf ~/theos/sdks
           git clone https://github.com/theos/sdks.git ~/theos/sdks
+          
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
@@ -24,6 +30,7 @@ jobs:
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
           # چارەسەری کێشەی std_tuple بە بەکارهێنانی وەشانی جێگیر
+          # و دۆزینەوەی فایلە ونبووەکانی وەک x2nios.h
           make package FINALPACKAGE=1 THEOS=~/theos SDKVERSION=14.5 OBJCFLAGS="-I. -I./Esp -I./KittyMemory"
           
       - name: Upload Result
