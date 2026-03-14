@@ -1,0 +1,25 @@
+name: Build_Kamo_Final
+on: push
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Theos
+        run: |
+          git clone --recursive https://github.com/theos/theos.git ~/theos
+          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS16.5.sdk.tar.xz
+          tar -xf iPhoneOS16.5.sdk.tar.xz -C ~/theos/sdks
+          echo "THEOS=~/theos" >> $GITHUB_ENV
+      - name: Build Menu
+        run: |
+          # ڕێکخستنی مەکفایل
+          sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
+          make package FINALPACKAGE=1 THEOS=~/theos SDKVERSION=16.5 THEOS_DEVICE_ARCH=arm64 \
+          ADDITIONAL_CFLAGS="-fno-modules -Wno-error" \
+          ADDITIONAL_LDFLAGS="-Wl,-framework,Metal -Wl,-framework,MetalKit -Wl,-framework,UIKit"
+      - name: Upload Result
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kamo-Deb-File
+          path: "packages/*.deb"
