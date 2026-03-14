@@ -8,18 +8,12 @@ jobs:
 
       - name: Setup Theos
         run: |
-          # سڕینەوەی هەموو شتێکی کۆن بۆ ئەوەی هەڵە نەیەت
           rm -rf ~/theos
-          
-          # دابەزاندنی تیۆس
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          
-          # دابەزاندنی SDK بە فەرمانی بەهێز
+          # دابەزاندنی وەشانێکی دیاریکراوی SDK کە کێشەی std_tuple ی نییە
           mkdir -p ~/theos/sdks
-          git clone https://github.com/theos/sdks.git ~/temp_sdks
-          mv ~/temp_sdks/* ~/theos/sdks/
-          rm -rf ~/temp_sdks
-          
+          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o ~/theos/sdks/sdk.tar.xz
+          tar -xf ~/theos/sdks/sdk.tar.xz -C ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
@@ -28,13 +22,14 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی مەکفایل
+          # فەرمانی تایبەت بۆ ناچارکردنی بەکارهێنانی SDK 14.5
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # زیادکردنی ڕێڕەوی فۆڵدەرەکان بۆ دۆزینەوەی فایلەکان
-          export OBJCFLAGS="-I. -I./Esp -I./KittyMemory"
+          # ئەم دوو دێڕە زۆر گرنگن بۆ چارەسەری std_tuple و فایلەکان
+          export OBJCFLAGS="-I. -I./Esp -I./KittyMemory -isysroot ~/theos/sdks/iPhoneOS14.5.sdk"
+          export COMMON_FLAGS="-isysroot ~/theos/sdks/iPhoneOS14.5.sdk"
           
-          make package FINALPACKAGE=1 THEOS=~/theos
+          make package FINALPACKAGE=1 THEOS=~/theos SDKVERSION=14.5 SYSROOT=~/theos/sdks/iPhoneOS14.5.sdk
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
