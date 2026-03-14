@@ -1,21 +1,4 @@
-name: Build
-on: push
-jobs:
-  build_job:
-    runs-on: macos-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Install Theos
-      run: |
-        git clone --recursive https://github.com/theos/theos.git ~/theos
-    - name: Compile
-      run: |
-        export THEOS=~/theos
-        make FINALPACKAGE=1
-      continue-on-error: true
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: KamoDylib
-        path: ./.theos/obj/arm64/*.dylib
+      - name: Install ldid
+        run: |
+          sudo curl -Lo /usr/local/bin/ldid https://github.com/procursus-team/ldid/releases/latest/download/ldid_linux_x86_64
+          sudo chmod +x /usr/local/bin/ldid
