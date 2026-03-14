@@ -16,15 +16,16 @@ jobs:
       - name: Build Hack
         run: |
           unzip -o iOS-IMGUI-Mod-Menu-Templates-main.zip
-          # دۆزینەوەی شوێنی ڕاستەقینەی پڕۆژەکە
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی مەکفایل و زیادکردنی ڕێڕەوی فایلەکان
+          # چاککردنی مەکفایل
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           
-          # لێنان بە زیادکردنی هەموو فۆڵدەرەکان بۆ ناو گەڕان
-          make package FINALPACKAGE=1 THEOS=~/theos ADDITIONAL_CFLAGS="-I. -I./Includes -I./src -I./Esp"
+          # گواستنەوەی هەموو فایلە .h کان بۆ ناو فۆڵدەری سەرەکی بۆ ئەوەی بیدۆزێتەوە
+          find . -name "*.h" -exec cp {} . \;
+          
+          make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
