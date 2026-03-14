@@ -9,8 +9,10 @@ jobs:
       - name: Setup Toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git perl python3 curl zip unzip
+          sudo apt-get install -y build-essential git perl python3 curl zip unzip clang
           git clone --recursive https://github.com/theos/theos.git ~/theos
+          # سڕینەوەی فۆڵدەرە کۆنەکە بۆ ئەوەی هەڵە نەدات
+          rm -rf ~/theos/sdks
           git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
@@ -20,10 +22,10 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی مەکفایل بۆ سیستەمی لینوکس
+          # چاککردنی مەکفایل
           sed -i 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # فەرمانی لێنان بەبێ پێویستی بە ماک
+          # لێنان لەسەر لینوکس
           make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
