@@ -1,12 +1,3 @@
-#import <UIKit/UIKit.h>
-
-@interface KamoESPView : UIView
-@end
-
-@implementation KamoESPView : UIView
-
-- (void)drawRect:(CGRect)rect {
-    // لێرە کۆدی ESP بنووسە
-}
-
-@end
+- name: Install ldid
+  run: |
+    brew install ldid
