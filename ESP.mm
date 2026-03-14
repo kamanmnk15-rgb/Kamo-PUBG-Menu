@@ -1,5 +1,5 @@
 #import <UIKit/UIKit.h>
 
-%ctor {
-  NSLog(@"Kamo Hack Loaded Successfully!");
+__attribute__((constructor)) static void initialize() {
+    NSLog(@"!!! Kamo Hack Loaded Successfully !!!");
 }
