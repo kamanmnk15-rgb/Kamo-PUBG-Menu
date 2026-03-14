@@ -13,7 +13,6 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git ~/theos
           rm -rf ~/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
-          # ڕێکخستنی ناوی SDK بۆ ئەوەی هیچ کێشەیەک نەمێنێت
           mv ~/theos/sdks/iPhoneOS*.sdk ~/theos/sdks/iPhoneOS.sdk || true
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
@@ -23,25 +22,25 @@ jobs:
           MAKE_LOC=$(find . -name "Makefile" -not -path "*/.*" | head -n 1)
           echo "PROJECT_ROOT=$(dirname "$MAKE_LOC")" >> $GITHUB_ENV
 
-      - name: Build Menu (The Final Solution)
+      - name: Build Menu (Final Success)
         run: |
           cd ${{ env.PROJECT_ROOT }}
           
-          # نوێکردنەوەی مەکفایل
+          # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # کوژاندنەوەی مۆدیوڵەکان بەتەواوی (بۆ چارەسەری هەڵەی std_stdint_h)
-          echo "ADDITIONAL_CFLAGS += -fno-modules -fno-module-maps -Wno-module-import-in-extern-c" >> Makefile
-          echo "ADDITIONAL_CXXFLAGS += -fno-modules -fno-module-maps -Wno-module-import-in-extern-c -std=c++17 -stdlib=libc++" >> Makefile
+          # چارەسەری هەڵەی Linker (ئەم بەشە نوێیە)
+          echo "Example_FRAMEWORKS = UIKit Foundation Metal MetalKit QuartzCore CoreGraphics CoreText" >> Makefile
+          echo "ADDITIONAL_LDFLAGS += -lstdc++ -lc++" >> Makefile
           
-          # زیادکردنی ڕێڕەوی کتێبخانەکان
-          echo "ADDITIONAL_CFLAGS += -I\$(THEOS)/sdks/iPhoneOS.sdk/usr/include" >> Makefile
-          echo "ADDITIONAL_CXXFLAGS += -I\$(THEOS)/sdks/iPhoneOS.sdk/usr/include/c++/v1" >> Makefile
+          # کوژاندنەوەی مۆدیوڵەکان و زیادکردنی ڕێڕەوی C++
+          echo "ADDITIONAL_CFLAGS += -fno-modules -fno-module-maps -I\$(THEOS)/sdks/iPhoneOS.sdk/usr/include" >> Makefile
+          echo "ADDITIONAL_CXXFLAGS += -fno-modules -fno-module-maps -std=c++17 -stdlib=libc++ -I\$(THEOS)/sdks/iPhoneOS.sdk/usr/include/c++/v1" >> Makefile
           
-          # گۆڕینی @import بۆ #import لە هەموو فایلەکاندا
+          # گۆڕینی @import بۆ #import
           find . -name "*.mm" -o -name "*.h" -o -name "*.cpp" | xargs sed -i '' 's|@import \(.*\);|#import <\1/\1.h>|g'
           
-          # لێنانی پاتکەکە
+          # لێنانی کۆتایی
           make package FINALPACKAGE=1 \
           THEOS=~/theos \
           ARCHS=arm64 \
@@ -50,5 +49,5 @@ jobs:
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Success-File
+          name: Kamo-PUBG-Menu-Success
           path: "**/*.deb"
