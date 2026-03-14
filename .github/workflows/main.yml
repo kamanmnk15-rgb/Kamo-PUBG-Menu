@@ -20,18 +20,18 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی مەکفایل
+          # چاککردنی مەکفایل بۆ ناو نیشانی تیۆس
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # فێڵێکی زۆر تایبەت بۆ چارەسەری cmath و مۆدیولە گرافیکییەکان
-          export COMMON_FLAGS="-DTHEOS_LEAN_AND_MEAN -fno-modules -fno-module-maps -DTARGET_OS_IPHONE=1"
-          export ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -Wno-error"
+          # ئەمە گرنگترین بەشە: وەستاندنی مۆدیولەکان بە شێوەی جێگیر
+          export COMMON_FLAGS="-fno-modules -fno-module-maps -DTHEOS_LEAN_AND_MEAN"
           
-          # بەکارهێنانی وەرگێڕی C++ بە شێوەی دەستی بۆ ئەوەی cmath بدۆزێتەوە
-          make package FINALPACKAGE=1 THEOS=~/theos SDKVERSION=14.5 \
-          THEOS_DEVICE_ARCH=arm64 \
-          ADDITIONAL_CXXFLAGS="-stdlib=libc++ -std=c++11" \
-          ADDITIONAL_LDFLAGS="-stdlib=libc++"
+          # لێنان بە ناچارکردنی بەکارهێنانی کتێبخانەی گرافیکی بە شێوەی دەستی
+          make package FINALPACKAGE=1 THEOS=~/theos \
+          SDKVERSION=14.5 \
+          ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -fno-modules -fno-module-maps" \
+          ADDITIONAL_LDFLAGS="-Wl,-framework,Metal -Wl,-framework,MetalKit -Wl,-framework,ModelIO -stdlib=libc++" \
+          GO_EASY_ON_ME=1
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
