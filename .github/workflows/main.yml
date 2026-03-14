@@ -12,14 +12,11 @@ jobs:
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
-      - name: Download SDK (Fixed)
+      - name: Setup SDK (No Extract)
         run: |
-          mkdir -p ~/theos/sdks
-          # بەکارهێنانی لینکێکی جێگیرتر بۆ SDK
-          curl -ksL "https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz" -o sdk.tar.xz
-          # تاقیکردنەوەی کردنەوەی فایلەکە بە فەرمانێکی جیاواز
-          tar -xJf sdk.tar.xz -C ~/theos/sdks
-          rm sdk.tar.xz
+          # لێرەدا ڕاستەوخۆ SDK لە ڕێگەی گیتەوە دادەبەزێنین بۆ ئەوەی تووشی هەڵەی فایل نەبین
+          rm -rf ~/theos/sdks
+          git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
       - name: Build Menu
         run: |
@@ -27,8 +24,10 @@ jobs:
           MAKEFILE_PATH=$(find . -name Makefile -maxdepth 3 | head -n 1)
           cd $(dirname "$MAKEFILE_PATH")
           
+          # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
+          # لێنان بە وەشانی 14.5 کە لە ناو گیتەکەدا هەیە
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
           THEOS_DEVICE_ARCH=arm64 \
@@ -38,5 +37,5 @@ jobs:
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Success
+          name: Kamo-Final-Package
           path: "**/packages/*.deb"
