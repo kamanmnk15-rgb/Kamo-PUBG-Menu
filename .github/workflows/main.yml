@@ -9,11 +9,8 @@ jobs:
       - name: Clean and Setup Theos
         run: |
           brew install ldid
-          # سڕینەوەی تەواوی تیۆسی کۆن بۆ ئەوەی هەڵەی "already exists" نەمێنێت
           sudo rm -rf ~/theos
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          
-          # دڵنیابوونەوە لەوەی فۆڵدەری SDK پاکە پێش دابەزاندن
           rm -rf ~/theos/sdks
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
@@ -24,25 +21,27 @@ jobs:
           MAKE_LOC=$(find . -name "Makefile" -not -path "*/.*" | head -n 1)
           echo "PROJECT_ROOT=$(dirname "$MAKE_LOC")" >> $GITHUB_ENV
 
-      - name: Build Menu (Final Success)
+      - name: Build Menu (Deep Module Fix)
         run: |
           cd ${{ env.PROJECT_ROOT }}
           
-          # نوێکردنەوەی مەکفایل
+          # چاککردنی مەکفایل و کوژاندنەوەی مۆدیوڵەکان لە ڕەگەوە
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
+          echo "ADDITIONAL_CFLAGS += -fno-modules -fno-module-maps" >> Makefile
+          echo "ADDITIONAL_OBJCCFLAGS += -fno-modules -fno-module-maps" >> Makefile
           
-          # چارەسەری هەڵەی C++ و مۆدیوڵەکان
+          # گۆڕینی هەرچی @import هەیە بۆ #import لە ناو هەموو فایلەکاندا
+          grep -rl "@import" . | xargs sed -i '' 's|@import \(.*\);|#import <\1/\1.h>|g'
+          
+          # لێنانی پڕۆژەکە
           make package FINALPACKAGE=1 \
           THEOS=~/theos \
           ARCHS=arm64 \
           SDKVERSION=14.5 \
-          ADDITIONAL_CFLAGS="-fno-modules -fobjc-arc -Wno-error-module-import-in-extern-c" \
-          ADDITIONAL_CXXFLAGS="-fno-modules -stdlib=libc++ -std=c++17" \
-          ADDITIONAL_LDFLAGS="-stdlib=libc++" \
           GO_EASY_ON_ME=1
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Final
+          name: Kamo-Deb-Final-Ready
           path: "**/*.deb"
