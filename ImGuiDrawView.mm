@@ -191,7 +191,18 @@ static bool MenDeal = true;
             {                
                 ImGui::Begin("BY KAMO", &MenDeal);
                 ImGui::Text("~>Use 3 Fingers Click 3 Times Open Menu\n~>2 Finger Tap Screen 2 Times Hide Menu\n\n~>Open In Lobby");
-                
+
+                    ImGuiStyle& style = ImGui::GetStyle();
+    style.WindowRounding = 5.3f;
+    style.FrameRounding = 2.3f;
+    style.ScrollbarRounding = 0;
+
+    style.Colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.90f); // پاشبنەمای ڕەش
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.70f, 0.00f, 0.00f, 1.00f); // سەرەوەی سوور
+    style.Colors[ImGuiCol_CheckMark] = ImVec4(0.90f, 0.00f, 0.00f, 1.00f); // نیشانەی ڕاستی سوور
+    style.Colors[ImGuiCol_Button] = ImVec4(0.50f, 0.00f, 0.00f, 1.00f); // دوگمەی سوور
+
              
         
           
