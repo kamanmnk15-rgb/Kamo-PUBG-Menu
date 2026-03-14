@@ -1,20 +1,13 @@
-name: Build
-on: push
-jobs:
-  build_job:
-    runs-on: macos-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    - name: Install Theos
-      run: |
-        git clone --recursive https://github.com/theos/theos.git ~/theos
-    - name: Compile
-      run: |
-        export THEOS=~/theos
-        make FINALPACKAGE=1
-    - name: Upload
-      uses: actions/upload-artifact@v4
-      with:
-        name: KamoDylib
-        path: ./*.dylib
+#import <UIKit/UIKit.h>
+
+static void didFinishLaunching(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Kamo Mode" message:@"Welcome to CODM Hack" preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil]];
+        [[UIApplication sharedApplication].keyWindow.rootViewController presentViewController:alert animated:YES completion:nil];
+    });
+}
+
+%ctor {
+    CFNotificationCenterAddObserver(CFNotificationCenterGetLocalCenter(), NULL, &didFinishLaunching, (CFStringRef)UIApplicationDidFinishLaunchingNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+}
