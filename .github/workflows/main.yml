@@ -20,16 +20,20 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
+          # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # چارەسەری کۆتایی بۆ KittyMemory و C++ Config
-          export OBJCFLAGS="-I. -I./Esp -I./KittyMemory -DTHEOS_LEAN_AND_MEAN -fno-modules"
-          export CFLAGS="-DTHEOS_LEAN_AND_MEAN"
+          # فێڵێکی زۆر زیرەکانە بۆ دۆزینەوەی cmath و هەموو فایلە ونبووەکان
+          export COMMON_FLAGS="-DTHEOS_LEAN_AND_MEAN -fno-modules -O3"
+          export ARCHS="arm64"
           
-          # فەرمانەکە بەبێ بەکارهێنانی وەشانی زۆر نوێی Xcode
-          make package FINALPACKAGE=1 THEOS=~/theos SDKVERSION=14.5 \
-          TARGET=iphone:clang:14.5:14.5 \
-          ADDITIONAL_CFLAGS="-Wno-error -Wno-implicit-function-declaration"
+          # بەکارهێنانی وەرگێڕی ستاندارد بەبێ ئاڵۆزی
+          make package FINALPACKAGE=1 THEOS=~/theos \
+          SDKVERSION=14.5 \
+          THEOS_DEVICE_IP= \
+          GO_EASY_ON_ME=1 \
+          ADDITIONAL_CFLAGS="-Wno-error -Wno-implicit-function-declaration -I. -I./Esp -I./KittyMemory" \
+          ADDITIONAL_LDFLAGS="-stdlib=libc++"
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
