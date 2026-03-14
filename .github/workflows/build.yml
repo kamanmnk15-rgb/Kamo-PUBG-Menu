@@ -1,25 +1,20 @@
 name: Build
-on: [push, pull_request]
-
+on: push
 jobs:
-  build:
+  build_job:
     runs-on: macos-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Theos
-        run: |
-          export THEOS=/Users/runner/theos
-          git clone --recursive https://github.com/theos/theos.git $THEOS
-
-      - name: Build Dylib
-        run: |
-          export THEOS=/Users/runner/theos
-          make FINALPACKAGE=1 ARCHS="arm64"
-          
-      - name: Upload Result
-        uses: actions/upload-artifact@v3
-        with:
-          name: Kamo-Dylib
-          path: ./*.dylib
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Install Theos
+      run: |
+        git clone --recursive https://github.com/theos/theos.git ~/theos
+    - name: Compile
+      run: |
+        export THEOS=~/theos
+        make FINALPACKAGE=1
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        name: KamoDylib
+        path: ./*.dylib
