@@ -8,38 +8,39 @@ jobs:
 
       - name: Setup Tools and Theos
         run: |
-          # دابمەزراندنی ldid بۆ ئەوەی هەڵەی Signing نەمێنێت
           brew install ldid
           sudo rm -rf ~/theos
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
-      - name: Setup SDK (New Version)
+      - name: Setup SDK (Stable Version)
         run: |
           rm -rf ~/theos/sdks
-          # ڕاکێشانی SDK بە شێوەیەک کە هەڵەی Format نەدات
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
-      - name: Extract and Find Project
+      - name: Extract and Prep Project
         run: |
-          # کردنەوەی فایلی زیپ ئەگەر مابێت
           find . -name "*.zip" -exec unzip -o {} \;
-          # دۆزینەوەی فۆڵدەری سەرەکی پڕۆژەکە
           MAKE_LOC=$(find . -name "Makefile" -not -path "*/.*" | head -n 1)
           echo "PROJECT_ROOT=$(dirname "$MAKE_LOC")" >> $GITHUB_ENV
 
-      - name: Build Menu
+      - name: Build Menu (Deep Fix)
         run: |
           cd ${{ env.PROJECT_ROOT }}
           
-          # چاککردنی مەکفایل
+          # چاککردنی مەکفایل بۆ ئەوەی ڕێڕەوی تیۆس ڕاست بێت
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # لێنان بە فانی تایبەت بۆ نەمانی هەڵەی ModelIO و MetalKit
+          # سڕینەوەی ئەو هێڵانەی دەبنە هۆی هەڵەی مۆدیوڵ لە ناو کۆدەکەدا
+          find . -name "*.mm" -o -name "*.h" | xargs sed -i '' 's|@import MetalKit;|#import <MetalKit/MetalKit.h>|g'
+          find . -name "*.mm" -o -name "*.h" | xargs sed -i '' 's|@import ModelIO;|#import <ModelIO/ModelIO.h>|g'
+          
+          # لێنان بە فانی زۆر توند بۆ تێپەڕاندنی مۆدیوڵەکان
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
           THEOS_DEVICE_ARCH=arm64 \
-          ADDITIONAL_CFLAGS="-fno-modules -Wno-error -Wno-module-import-in-extern-c" \
+          ADDITIONAL_CFLAGS="-fno-modules -fno-module-maps -Wno-error" \
+          ADDITIONAL_OBJCFLAGS="-fno-modules -fno-module-maps" \
           GO_EASY_ON_ME=1
           
       - name: Upload Result
