@@ -23,11 +23,11 @@ jobs:
           # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # هێزی "فێڵکردن" لە سیستمەکە بۆ ئەوەی کێشەی std_tuple نەمێنێت
-          export OBJCFLAGS="-I. -I./Esp -I./KittyMemory -DTHEOS_LEAN_AND_MEAN"
-          export CFLAGS="-DTHEOS_LEAN_AND_MEAN"
+          # فێڵێکی زۆر بەهێز بۆ وەستاندنی کێشەی ModelIO و MetalKit
+          export OBJCFLAGS="-I. -I./Esp -I./KittyMemory -fno-modules -fcxx-modules"
+          export COMMON_FLAGS="-fno-modules"
           
-          # فەرمانی لێنان بە وەشانی جێگیر
+          # لێنان بەبێ کتێبخانە ئاڵۆزەکان
           make package FINALPACKAGE=1 THEOS=~/theos SDKVERSION=14.5
           
       - name: Upload Result
