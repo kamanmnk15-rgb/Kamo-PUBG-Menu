@@ -5,7 +5,8 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = CODM_KAMO
 
-CODM_KAMO_FILES = Tweak.x ESP.mm
+# لێرە تەنها ناوی ئەو فایلانە بنووسە کە هەتە
+CODM_KAMO_FILES = ESP.mm
 CODM_KAMO_CFLAGS = -fobjc-arc
 
 include $(THEOS_MAKE_PATH)/tweak.mk
