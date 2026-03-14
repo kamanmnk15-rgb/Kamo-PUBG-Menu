@@ -9,7 +9,6 @@ jobs:
       - name: Setup Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # سڕینەوەی فۆڵدەرە کۆنەکان بۆ ئەوەی هەڵە نەدات
           rm -rf ~/theos/sdks
           git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
@@ -17,14 +16,15 @@ jobs:
       - name: Build Hack
         run: |
           unzip -o iOS-IMGUI-Mod-Menu-Templates-main.zip
+          # دۆزینەوەی شوێنی ڕاستەقینەی پڕۆژەکە
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # ڕێکخستنی مەکفایل
+          # چاککردنی مەکفایل و زیادکردنی ڕێڕەوی فایلەکان
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           
-          # دروستکردنی پاکێج
-          make package FINALPACKAGE=1 THEOS=~/theos
+          # لێنان بە زیادکردنی هەموو فۆڵدەرەکان بۆ ناو گەڕان
+          make package FINALPACKAGE=1 THEOS=~/theos ADDITIONAL_CFLAGS="-I. -I./Includes -I./src -I./Esp"
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
