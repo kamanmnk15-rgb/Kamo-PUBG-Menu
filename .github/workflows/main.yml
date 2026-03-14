@@ -16,13 +16,16 @@ jobs:
       - name: Build Hack
         run: |
           unzip -o *.zip
+          # دۆزینەوەی فۆڵدەری سەرەکی پڕۆژەکە
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی ڕێڕەوە هەڵەکانی ناو مەکفایل
+          # چاککردنی مەکفایل و زیادکردنی ڕێڕەوی فایلەکان
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
-          sed -i '' 's|include $(THEOS)/makefiles/common.mk|include ~/theos/makefiles/common.mk|g' Makefile
-          sed -i '' 's|include $(THEOS_MAKE_PATH)/tweak.mk|include ~/theos/makefiles/tweak.mk|g' Makefile
+          
+          # ئەم دێڕە کێشەی x2nios.h چارەسەر دەکات
+          export OBJCFLAGS="-I. -I./Esp -I./KittyMemory"
+          export CFLAGS="-I. -I./Esp -I./KittyMemory"
           
           make package FINALPACKAGE=1 THEOS=~/theos
           
