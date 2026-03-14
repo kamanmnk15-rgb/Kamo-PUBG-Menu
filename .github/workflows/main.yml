@@ -6,16 +6,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Theos
+      - name: Setup Theos and Tools
         run: |
+          # دابمەزراندنی ldid بۆ مۆرکردنی فایلەکە
+          brew install ldid
+          
           sudo rm -rf ~/theos
           git clone --recursive https://github.com/theos/theos.git ~/theos
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
-      - name: Setup SDK 16.5 (Newest)
+      - name: Setup SDK (Fixed)
         run: |
           rm -rf ~/theos/sdks
-          # دابەزاندنی وەشانی نوێتر بۆ نەمانی هەڵەی MetalKit
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
 
       - name: Extract and Find Files
@@ -29,9 +31,9 @@ jobs:
           cd ${{ env.PROJECT_ROOT }}
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # لێنان بە وەشانی 16.5 بۆ ئەوەی هەموو مۆدیولەکان بناسێتەوە
+          # لێنان بە هەمان ڕێگای سەرکەوتووی پێشوو
           make package FINALPACKAGE=1 THEOS=~/theos \
-          SDKVERSION=16.5 \
+          SDKVERSION=14.5 \
           THEOS_DEVICE_ARCH=arm64 \
           ADDITIONAL_CFLAGS="-fno-modules -Wno-error" \
           GO_EASY_ON_ME=1
@@ -40,4 +42,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Kamo-Deb-Success
-          path: "**/packages/*.deb"
+          path: "**/*.deb"
