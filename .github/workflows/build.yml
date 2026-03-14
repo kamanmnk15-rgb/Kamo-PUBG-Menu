@@ -1,4 +1,35 @@
+name: build_job
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Theos
+        run: |
+          export THEOS=~/theos
+          curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos >> install-theos.sh
+          bash install-theos.sh
+          
       - name: Install ldid
         run: |
-          sudo curl -Lo /usr/local/bin/ldid https://github.com/procursus-team/ldid/releases/latest/download/ldid_linux_x86_64
-          sudo chmod +x /usr/local/bin/ldid
+          brew install ldid
+
+      - name: Compile
+        run: |
+          export THEOS=~/theos
+          make clean all
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CODM_KAMO_Tweak
+          path: .theos/obj/arm64/*.dylib
