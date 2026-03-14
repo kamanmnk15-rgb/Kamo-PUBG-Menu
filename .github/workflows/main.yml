@@ -2,30 +2,27 @@ name: Build_Kamo_Hack
 on: push
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-13 # لێرەدا وەشانەکەمان گۆڕی بۆ کۆنتر تا کێشەی نەمێنێت
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Theos
         run: |
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          rm -rf ~/theos/sdks
           git clone https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
         run: |
-          unzip -o iOS-IMGUI-Mod-Menu-Templates-main.zip
+          unzip -o *.zip
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
           # چاککردنی مەکفایل
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           
-          # فێڵە گەورەکە: هەموو فۆڵدەرەکان دەخەینە ناو لیستی گەڕان
-          export CFLAGS="-I. -I./Esp -I./KittyMemory -I./Includes"
-          
-          make package FINALPACKAGE=1 THEOS=~/theos ADDITIONAL_CFLAGS="$CFLAGS"
+          # فەرمانی لێنان بە وەشانی گونجاو
+          make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
