@@ -6,35 +6,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Tools
+      - name: Setup Tools and Theos
         run: |
           brew install ldid
+          # سڕینەوەی هەر پاشماوەیەکی پێشوو بۆ ڕێگری لە هەڵەی "already exists"
           sudo rm -rf ~/theos
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # دابەزاندنی SDK ڕاستەوخۆ بۆ ناو شوێنی سەرەکی
+          # دابەزاندنی SDK بە شێوەیەک کە کێشەی بوونی فۆڵدەر دروست نەکات
           git clone --depth=1 https://github.com/theos/sdks.git ~/theos/sdks
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Extract Project
         run: |
           find . -name "*.zip" -exec unzip -o {} \;
-          # دۆزینەوەی فایلی Makefile
           MAKE_LOC=$(find . -name "Makefile" -not -path "*/.*" | head -n 1)
           echo "PROJECT_ROOT=$(dirname "$MAKE_LOC")" >> $GITHUB_ENV
 
-      - name: Build Menu
+      - name: Build Menu (Final Success)
         run: |
           cd ${{ env.PROJECT_ROOT }}
           
-          # چاککردنی Makefile
+          # نوێکردنەوەی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # گرنگترین بەش: ناچارکردنی بەکارهێنانی C++17 و libc++
+          # چارەسەری هەڵەی C++ و مۆدیوڵەکان بە یەکجاری
           make package FINALPACKAGE=1 \
           THEOS=~/theos \
           ARCHS=arm64 \
           SDKVERSION=14.5 \
-          ADDITIONAL_CFLAGS="-fno-modules -Wno-error" \
+          ADDITIONAL_CFLAGS="-fno-modules -fobjc-arc -Wno-error-module-import-in-extern-c" \
           ADDITIONAL_CXXFLAGS="-fno-modules -stdlib=libc++ -std=c++17" \
           ADDITIONAL_LDFLAGS="-stdlib=libc++" \
           GO_EASY_ON_ME=1
@@ -42,5 +42,5 @@ jobs:
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Final
+          name: Kamo-Deb-Final-Build
           path: "**/*.deb"
