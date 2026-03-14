@@ -21,19 +21,21 @@ jobs:
           MAKE_LOC=$(find . -name "Makefile" -not -path "*/.*" | head -n 1)
           echo "PROJECT_ROOT=$(dirname "$MAKE_LOC")" >> $GITHUB_ENV
 
-      - name: Build Menu (Deep Module Fix)
+      - name: Build Menu (Final Logic Fix)
         run: |
           cd ${{ env.PROJECT_ROOT }}
           
-          # چاککردنی مەکفایل و کوژاندنەوەی مۆدیوڵەکان لە ڕەگەوە
+          # چاککردنی مەکفایل بە شێوەیەکی توند
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
-          echo "ADDITIONAL_CFLAGS += -fno-modules -fno-module-maps" >> Makefile
-          echo "ADDITIONAL_OBJCCFLAGS += -fno-modules -fno-module-maps" >> Makefile
           
-          # گۆڕینی هەرچی @import هەیە بۆ #import لە ناو هەموو فایلەکاندا
-          grep -rl "@import" . | xargs sed -i '' 's|@import \(.*\);|#import <\1/\1.h>|g'
+          # زیادکردنی ڕێڕەوی کتێبخانەکانی C++ کە بریتین لە cmath و هاوڕێکانی
+          echo "ADDITIONAL_CFLAGS += -I\$(THEOS)/sdks/iPhoneOS14.5.sdk/usr/include/c++/v1 -I\$(THEOS)/sdks/iPhoneOS14.5.sdk/usr/include -fno-modules" >> Makefile
+          echo "ADDITIONAL_CXXFLAGS += -I\$(THEOS)/sdks/iPhoneOS14.5.sdk/usr/include/c++/v1 -I\$(THEOS)/sdks/iPhoneOS14.5.sdk/usr/include -fno-modules -std=c++17" >> Makefile
+          echo "Example_LDFLAGS += -lc++" >> Makefile
           
-          # لێنانی پڕۆژەکە
+          # سڕینەوەی @import کە کێشەی MetalKit و ModelIO دروست دەکات
+          find . -name "*.mm" -o -name "*.h" | xargs sed -i '' 's|@import \(.*\);|#import <\1/\1.h>|g'
+          
           make package FINALPACKAGE=1 \
           THEOS=~/theos \
           ARCHS=arm64 \
@@ -43,5 +45,5 @@ jobs:
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Final-Ready
+          name: Kamo-Deb-Success
           path: "**/*.deb"
