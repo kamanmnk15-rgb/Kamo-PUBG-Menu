@@ -23,16 +23,14 @@ jobs:
           # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # چارەسەری کۆتایی بۆ cmath و MetalKit بە ڕێگای دەستی
-          export COMMON_FLAGS="-DTHEOS_LEAN_AND_MEAN -fno-modules -fno-module-maps -w"
+          # کوژاندنەوەی مۆدیولەکان بە توندی بۆ ئەوەی چیتر هەڵەی MetalKit نەدات
+          export COMMON_FLAGS="-fno-modules -fno-module-maps -DTHEOS_LEAN_AND_MEAN -w"
           
-          # نیشاندانی شوێنی فایلەکان بە وەرگێڕەکە بە شێوەی ڕاستەوخۆ
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
-          THEOS_DEVICE_ARCH=arm64 \
-          ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -fno-modules" \
-          ADDITIONAL_CXXFLAGS="-I$THEOS/sdks/iPhoneOS14.5.sdk/usr/include/c++/v1 -stdlib=libc++ -std=c++11 -fno-modules" \
-          ADDITIONAL_LDFLAGS="-stdlib=libc++ -Wl,-framework,Metal -Wl,-framework,MetalKit -Wl,-framework,ModelIO" \
+          ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -fno-modules -fno-module-maps" \
+          ADDITIONAL_CXXFLAGS="-fno-modules -fno-module-maps -stdlib=libc++" \
+          ADDITIONAL_LDFLAGS="-Wl,-framework,Metal -Wl,-framework,MetalKit -Wl,-framework,ModelIO -Wl,-framework,QuartzCore -Wl,-framework,UIKit -Wl,-framework,CoreGraphics -stdlib=libc++" \
           GO_EASY_ON_ME=1
           
       - name: Upload Result
