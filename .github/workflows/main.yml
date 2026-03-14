@@ -22,10 +22,10 @@ jobs:
           # چاککردنی مەکفایل
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           
-          # گواستنەوەی هەموو فایلە .h کان بۆ ناو فۆڵدەری سەرەکی بۆ ئەوەی بیدۆزێتەوە
-          find . -name "*.h" -exec cp {} . \;
+          # فێڵە گەورەکە: هەموو فۆڵدەرەکان دەخەینە ناو لیستی گەڕان
+          export CFLAGS="-I. -I./Esp -I./KittyMemory -I./Includes"
           
-          make package FINALPACKAGE=1 THEOS=~/theos
+          make package FINALPACKAGE=1 THEOS=~/theos ADDITIONAL_CFLAGS="$CFLAGS"
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
