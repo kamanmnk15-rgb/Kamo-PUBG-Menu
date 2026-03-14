@@ -28,16 +28,16 @@ jobs:
           cd ${{ env.PROJECT_ROOT }}
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # زیادکردنی فانی "fno-modules" بە شێوەیەکی توندتر بۆ چارەسەری ModelIO
+          # زیادکردنی فانی تایبەت بۆ تێپەڕاندنی هەڵەی MetalKit و ModelIO
           make package FINALPACKAGE=1 THEOS=~/theos \
           SDKVERSION=14.5 \
           THEOS_DEVICE_ARCH=arm64 \
-          ADDITIONAL_CFLAGS="-I. -I./IMGUI -fno-modules -fobjc-arc" \
-          ADDITIONAL_CXXFLAGS="-I. -I./IMGUI -fno-modules -fobjc-arc" \
+          ADDITIONAL_CFLAGS="-fno-modules -fcxx-modules -Wno-error -Wno-module-import-in-extern-c" \
+          ADDITIONAL_LDFLAGS="-Wl,-framework,Metal -Wl,-framework,MetalKit -Wl,-framework,ModelIO" \
           GO_EASY_ON_ME=1
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
         with:
-          name: Kamo-Deb-Success
+          name: Kamo-Deb-Fixed
           path: "**/packages/*.deb"
