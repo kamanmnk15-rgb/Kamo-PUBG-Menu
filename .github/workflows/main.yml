@@ -8,9 +8,18 @@ jobs:
 
       - name: Setup Theos
         run: |
+          # سڕینەوەی هەموو شتێکی کۆن بۆ ئەوەی هەڵە نەیەت
+          rm -rf ~/theos
+          
+          # دابەزاندنی تیۆس
           git clone --recursive https://github.com/theos/theos.git ~/theos
-          # دابەزاندنی SDK بە ڕێگایەکی جیاواز کە تێک ناچێت
-          git clone https://github.com/theos/sdks.git ~/theos/sdks
+          
+          # دابەزاندنی SDK بە فەرمانی بەهێز
+          mkdir -p ~/theos/sdks
+          git clone https://github.com/theos/sdks.git ~/temp_sdks
+          mv ~/temp_sdks/* ~/theos/sdks/
+          rm -rf ~/temp_sdks
+          
           echo "THEOS=~/theos" >> $GITHUB_ENV
 
       - name: Build Hack
@@ -19,10 +28,10 @@ jobs:
           PROJECT_DIR=$(dirname $(find . -name Makefile | head -1))
           cd "$PROJECT_DIR"
           
-          # چاککردنی ڕێڕەوەکان
+          # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # پێناسەکردنی شوێنی فایلەکان بۆ ئەوەی x2nios.h بدۆزێتەوە
+          # زیادکردنی ڕێڕەوی فۆڵدەرەکان بۆ دۆزینەوەی فایلەکان
           export OBJCFLAGS="-I. -I./Esp -I./KittyMemory"
           
           make package FINALPACKAGE=1 THEOS=~/theos
