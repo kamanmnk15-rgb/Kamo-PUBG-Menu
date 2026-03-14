@@ -21,12 +21,12 @@ jobs:
           sed -i '' 's|^THEOS =.*|THEOS = ~/theos|g' Makefile
           sed -i '' 's|/var/mobile/theos|$(THEOS)|g' Makefile
           
-          # داگرتنی SDK بە ڕێگایەکی جیاواز و دڵنیاتر
+          # داگرتنی SDK لە لینکێکی تر کە زۆر جێگیرە
           mkdir -p ~/theos/sdks
-          curl -L https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz -o sdk.tar.xz
-          tar -xf sdk.tar.xz -C ~/theos/sdks
+          curl -LO https://github.com/theos/sdks/raw/master/iPhoneOS14.5.sdk.tar.xz
+          tar -xf iPhoneOS14.5.sdk.tar.xz -C ~/theos/sdks
           
-          # دەستپێکردنی لێنان
+          # لێنان بەبێ وەستان
           make package FINALPACKAGE=1 THEOS=~/theos
           
       - name: Upload Result
