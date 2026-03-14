@@ -23,17 +23,13 @@ jobs:
           # چاککردنی مەکفایل
           sed -i '' 's|/var/mobile/theos|~/theos|g' Makefile
           
-          # فێڵێکی زۆر زیرەکانە بۆ دۆزینەوەی cmath و هەموو فایلە ونبووەکان
-          export COMMON_FLAGS="-DTHEOS_LEAN_AND_MEAN -fno-modules -O3"
-          export ARCHS="arm64"
+          # فێڵێکی زۆر تایبەت بۆ چارەسەری MetalKit و ModelIO
+          # لێرەدا پێی دەڵێین بە هێز (Force) ئەو مۆدیولانە بپەڕێنە
+          export COMMON_FLAGS="-DTHEOS_LEAN_AND_MEAN -fno-modules -fno-module-maps"
           
-          # بەکارهێنانی وەرگێڕی ستاندارد بەبێ ئاڵۆزی
-          make package FINALPACKAGE=1 THEOS=~/theos \
-          SDKVERSION=14.5 \
-          THEOS_DEVICE_IP= \
-          GO_EASY_ON_ME=1 \
-          ADDITIONAL_CFLAGS="-Wno-error -Wno-implicit-function-declaration -I. -I./Esp -I./KittyMemory" \
-          ADDITIONAL_LDFLAGS="-stdlib=libc++"
+          make package FINALPACKAGE=1 THEOS=~/theos SDKVERSION=14.5 \
+          ADDITIONAL_CFLAGS="-I. -I./Esp -I./KittyMemory -Wno-error -Wno-module-import-in-extern-c" \
+          ADDITIONAL_OBJCCFLAGS="-fno-modules -fno-module-maps"
           
       - name: Upload Result
         uses: actions/upload-artifact@v4
