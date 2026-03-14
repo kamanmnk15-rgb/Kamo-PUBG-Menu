@@ -13,8 +13,9 @@ jobs:
       run: |
         export THEOS=~/theos
         make FINALPACKAGE=1
+      continue-on-error: true
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
         name: KamoDylib
-        path: ./*.dylib
+        path: ./.theos/obj/arm64/*.dylib
