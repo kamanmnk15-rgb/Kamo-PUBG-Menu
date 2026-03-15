@@ -1,35 +1,31 @@
 #import <UIKit/UIKit.h>
+#import <mach-o/dyld.h>
+#import <rd_route.h> // ئەگەر ڕێگەی پێ بدات بۆ پاتچکردن
 
-@interface KamoESP : UIView
+// لێرەدا ئۆفسێتی ڕادار دادەنێین کاتێک دۆزیمانەوە
+// نموونە: 0x1234567
+#define kRadarOffset 0x0 
+
+void patchUAV() {
+    uintptr_t address = _dyld_get_image_header(0) + kRadarOffset;
+    if (address > 0) {
+        // ئەم کۆدە میمۆری دەگۆڕێت بۆ ئەوەی ڕادار هەمیشە ئۆن بێت
+        mach_port_t self = mach_task_self();
+        vm_protect(self, (vm_address_t)address, 4, FALSE, VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY);
+        *(uint32_t *)address = 0xD503201F; // کۆدی NOP (بۆ تێپەڕاندنی مەرجی UAV)
+        vm_protect(self, (vm_address_t)address, 4, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+        NSLog(@"KAMO: UAV Activated ✅");
+    }
+}
+
+@interface KamoUAV : NSObject
 @end
 
-@implementation KamoESP
-
+@implementation KamoUAV
 + (void)load {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        UIWindow *window = nil;
-        for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive) {
-                window = scene.windows.firstObject;
-                break;
-            }
-        }
-        KamoESP *espView = [[KamoESP alloc] initWithFrame:[UIScreen mainScreen].bounds];
-        espView.backgroundColor = [UIColor clearColor];
-        espView.userInteractionEnabled = NO;
-        [window addSubview:espView];
+    // دوای ١٥ چرکە لە ناو یاری چالاک دەبێت
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(15 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        patchUAV();
     });
 }
-
-- (void)drawRect:(CGRect)rect {
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextSetLineWidth(context, 3.0);
-    CGContextSetStrokeColorWithColor(context, [UIColor redColor].CGColor);
-
-    // دروستکردنی بۆکسێکی تێست لە ناوەڕاستی شاشە
-    CGRect box = CGRectMake(rect.size.width/2 - 50, rect.size.height/2 - 100, 100, 200);
-    CGContextAddRect(context, box);
-    CGContextStrokePath(context);
-}
-
 @end
