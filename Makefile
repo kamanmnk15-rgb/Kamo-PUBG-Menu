@@ -6,10 +6,10 @@ ARCHS = arm64 arm64e
 
 include $(THEOS)/makefiles/common.mk
 
-TWEAK_NAME = CODM_KAMO_Tweak
+TWEAK_NAME = KamoPUBG
 
-CODM_KAMO_Tweak_FILES = ESP.mm
-CODM_KAMO_Tweak_CFLAGS = -fobjc-arc
-CODM_KAMO_Tweak_FRAMEWORKS = UIKit Foundation
+KamoPUBG_FILES = ESP.mm
+KamoPUBG_CFLAGS = -fobjc-arc
+KamoPUBG_FRAMEWORKS = UIKit Foundation
 
 include $(THEOS_MAKE_PATH)/tweak.mk
