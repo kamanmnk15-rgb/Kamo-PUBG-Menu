@@ -2,7 +2,7 @@
 #import <mach-o/dyld.h>
 #import <mach/mach.h>
 
-// --- [بەشی ئۆفسێتەکان - لێرەدا ژمارەکان پڕ دەکەینەوە] ---
+// --- [ ئەمانە ئۆفسێتەکانن - بەنزینەکە ] ---
 uintptr_t GWorld = 0x0; 
 uintptr_t ViewMatrix = 0x0;
 uintptr_t EntityList = 0x0;
@@ -16,6 +16,7 @@ uintptr_t EntityList = 0x0;
     if (self) {
         self.backgroundColor = [UIColor clearColor];
         self.userInteractionEnabled = NO;
+        // بزوێنەری نوێکردنەوە (60 جار لە چرکەیەکدا)
         CADisplayLink *link = [CADisplayLink displayLinkWithTarget:self selector:@selector(setNeedsDisplay)];
         [link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
     }
@@ -26,31 +27,38 @@ uintptr_t EntityList = 0x0;
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     if (!ctx) return;
 
-    // کێشانی چوارگۆشەی تێست
+    // کێشانی چوارگۆشە سەوزەکە
     CGContextSetStrokeColorWithColor(ctx, [UIColor greenColor].CGColor);
     CGContextSetLineWidth(ctx, 2.0);
-    CGContextStrokeRect(ctx, CGRectMake(rect.size.width/2-50, rect.size.height/2-100, 100, 200));
+    
+    // لێرەدا کاتێک ئۆفسێتەکانمان دۆزییەوە، ئەم چوارگۆشەیە دەجوڵێنین
+    CGRect box = CGRectMake(rect.size.width/2 - 50, rect.size.height/2 - 100, 100, 200);
+    CGContextStrokeRect(ctx, box);
 }
 @end
 
+// --- [ چالاککەری هاکەکە بەبێ کێشەی keyWindow ] ---
 __attribute__((constructor))
-static void start_kamo_esp() {
+static void start_kamo_engine() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(45 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         
-        UIWindow *activeWin = nil;
-        // چارەسەری مۆدێرن بۆ ئەوەی گیتھەب Error نەدات
-        NSArray *scenes = [[[UIApplication sharedApplication] connectedScenes] allObjects];
-        for (id scene in scenes) {
-            if ([scene respondsToSelector:@selector(activationState)] && 
-                [scene activationState] == 0) { // 0 = Active
-                activeWin = [[scene performSelector:@selector(windows)] firstObject];
-                break;
+        UIWindow *mainWin = nil;
+        // بەکارهێنانی فێڵێکی مۆدێرن بۆ دۆزینەوەی شاشە تا گیتھەب Error نەدات
+        for (UIScene *scene in [[UIApplication sharedApplication] connectedScenes]) {
+            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
+                UIWindowScene *winScene = (UIWindowScene *)scene;
+                for (UIWindow *win in winScene.windows) {
+                    if (win.isKeyWindow) {
+                        mainWin = win;
+                        break;
+                    }
+                }
             }
         }
 
-        if (activeWin) {
-            KamoFinalESP *overlay = [[KamoFinalESP alloc] initWithFrame:activeWin.bounds];
-            [activeWin addSubview:overlay];
+        if (mainWin) {
+            KamoFinalESP *overlay = [[KamoFinalESP alloc] initWithFrame:mainWin.bounds];
+            [mainWin addSubview:overlay];
         }
     });
 }
