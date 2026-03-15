@@ -8,16 +8,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Theos and ldid
-        run: |
-          bash -c "$(curl -fsSL https://raw.githubusercontent.com/theos/theos/master/bin/install-theos)"
-          brew install ldid
+      - name: Setup Theos
+        uses: theos/setup-theos-action@v1
+
+      - name: Install ldid
+        run: brew install ldid
 
       - name: Build Tweak
         run: |
-          export THEOS=~/theos
           make clean all
-        
+        env:
+          THEOS: ${{ github.workspace }}/theos
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
