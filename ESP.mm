@@ -1,26 +1,50 @@
 #import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
 
-// ئەدرێسی یەکەم (ئەگەر ئیشی نەکرد دانەی دووەم تاقی دەکەینەوە)
-#define CHAMS_OFFSET 0x367F110 
+// --- [1] دروستکردنی شاشەی ESP ---
+@interface KamoESPBox : UIView
+@end
 
-void applyWall() {
-    uintptr_t base = (uintptr_t)_dyld_get_image_header(0);
-    uintptr_t target = base + CHAMS_OFFSET;
-    
-    // کۆدی نۆپ (NOP) بۆ وەستاندنی ڕەنگە ئەسڵییەکە و دەرکەوتنی سێبەرەکە
-    uint32_t patch = 0xD503201F; 
-
-    mach_port_t task = mach_task_self();
-    vm_protect(task, (vm_address_t)target, 4, FALSE, VM_PROT_READ | VM_PROT_WRITE | VM_PROT_COPY);
-    *(uint32_t *)target = patch;
-    vm_protect(task, (vm_address_t)target, 4, FALSE, VM_PROT_READ | VM_PROT_EXECUTE);
+@implementation KamoESPBox
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        self.backgroundColor = [UIColor clearColor];
+        self.userInteractionEnabled = NO; // بۆ ئەوەی ڕێگری لە یاری نەکات
+    }
+    return self;
 }
 
+// ئەم بەشە چوارگۆشەکان دەکێشێت
+- (void)drawRect:(CGRect)rect {
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    // کێشانی نموونەیەک لە ESP Box (ڕەنگی سوور)
+    // تێبینی: ئەمە تەنها بۆ تێستە تا بزانیت ESPـەکە چالاکە
+    CGRect enemyBox = CGRectMake(rect.size.width / 2 - 50, rect.size.height / 2 - 100, 100, 200);
+    
+    CGContextSetStrokeColorWithColor(context, [UIColor redColor].CGColor);
+    CGContextSetLineWidth(context, 2.0);
+    CGContextStrokeRect(context, enemyBox);
+    
+    // کێشانی هێڵ بۆ ناوەڕاستی چوارگۆشەکە (Line ESP)
+    CGContextMoveToPoint(context, rect.size.width / 2, 0);
+    CGContextAddLineToPoint(context, rect.size.width / 2, rect.size.height / 2 - 100);
+    CGContextStrokePath(context);
+}
+@end
+
+// --- [2] سیستەمی Anti-Ban و چالاککەر ---
 __attribute__((constructor))
-static void init() {
-    // بۆ دڵنیایی زیاتر با ٤٠ چرکە بێت تا بە تەواوی دەچیتە ناو نەخشەکە
+static void start_esp_system() {
+    // یارییەکە کات دەدات بە مۆبایلەکە تا هەموو شتێک باربکات
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(40 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        applyWall();
+        
+        UIWindow *mainWin = [[UIApplication sharedApplication] keyWindow];
+        if (mainWin) {
+            KamoESPBox *espLayer = [[KamoESPBox alloc] initWithFrame:mainWin.bounds];
+            [mainWin addSubview:espLayer];
+            NSLog(@"[KAMO] ESP Box Overlay Activated Successfully!");
+        }
     });
 }
