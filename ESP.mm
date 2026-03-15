@@ -1,67 +1,48 @@
 #import <UIKit/UIKit.h>
-#import <mach-o/dyld.h>
+#import <mach/mach.h>
 
-// --- [1] دروستکردنی شاشەی ESP کە نوێ دەبێتەوە ---
-@interface KamoESPView : UIView
-@property (nonatomic, strong) CADisplayLink *displayLink;
+// --- [بەشی ئۆفسێتەکان - لێرەدا ژمارەکان دادەنێین] ---
+uintptr_t OFFSET_GWorld = 0x0;        // دەبێت بدۆزرێتەوە
+uintptr_t OFFSET_ViewMatrix = 0x0;   // دەبێت بدۆزرێتەوە
+uintptr_t OFFSET_EntityList = 0x0;   // دەبێت بدۆزرێتەوە
+
+@interface KamoProESP : UIView
 @end
 
-@implementation KamoESPView
-
+@implementation KamoProESP
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor clearColor];
         self.userInteractionEnabled = NO;
-        
-        // دروستکردنی لووپ بۆ ئەوەی ESPەکە نەپچڕێت و بجوڵێت
-        self.displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(updateESP)];
-        [self.displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        [CADisplayLink displayLinkWithTarget:self selector:@selector(update)].priority = 1;
+        [[CADisplayLink displayLinkWithTarget:self selector:@selector(update)] addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
     }
     return self;
 }
 
-- (void)updateESP {
-    [self setNeedsDisplay]; // ئەمە وادەکات شاشەکە ٦٠ جار لە چرکەیەکدا نوێ بێتەوە
-}
+- (void)update { [self setNeedsDisplay]; }
 
 - (void)drawRect:(CGRect)rect {
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    if (!context) return;
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    if (!ctx) return;
 
-    // لێرەدا ڕەنگی چوارگۆشەکە دەگۆڕین بۆ سەوز (وەک ESPی پرۆفیشناڵ)
-    CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
-    CGContextSetLineWidth(context, 1.5);
-
-    /* تێبینی: لێرەدا دەبێت لە داهاتوودا کۆدی خوێندنەوەی (X, Y)ی دوژمن دابنێین.
-       بۆ ئێستا، چوارگۆشەیەک بە نموونە دادەنێین کە کەمێک دەجوڵێت بۆ ئەوەی بزانیت لووپەکە ئیش دەکات.
-    */
+    // --- لێرەدا کۆدی دۆزینەوەی دوژمن دەنووسرێت ---
+    // ئەگەر OFFSET_GWorld سفر نەبوو، دەست دەکات بە کێشانی چوارگۆشە بە دوای دوژمن
     
-    static float moveX = 0;
-    moveX += 0.5; if(moveX > 100) moveX = 0; // تاقیکردنەوەی جوڵە
-
-    CGRect enemyBox = CGRectMake(rect.size.width / 2 - 50 + moveX, rect.size.height / 2 - 80, 80, 160);
-    CGContextStrokeRect(context, enemyBox);
+    CGContextSetStrokeColorWithColor(ctx, [UIColor greenColor].CGColor);
+    CGContextSetLineWidth(ctx, 2.0);
+    
+    // کێشانی چوارگۆشە (بۆ ئێستا وەک نموونە)
+    CGContextStrokeRect(ctx, CGRectMake(rect.size.width/2-50, rect.size.height/2-100, 100, 200));
 }
 @end
 
-// --- [2] چالاککەر ---
+// چالاککەری سەرەکی
 __attribute__((constructor))
-static void init_kamo_esp() {
+static void init_pro_esp() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(45 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        
-        UIWindow *activeWin = nil;
-        for (UIWindowScene* scene in [UIApplication sharedApplication].connectedScenes) {
-            if (scene.activationState == UISceneActivationStateForegroundActive) {
-                for (UIWindow* window in scene.windows) {
-                    if (window.isKeyWindow) { activeWin = window; break; }
-                }
-            }
-        }
-
-        if (activeWin) {
-            KamoESPView *esp = [[KamoESPView alloc] initWithFrame:activeWin.bounds];
-            [activeWin addSubview:esp];
-        }
+        UIWindow *win = [[UIApplication sharedApplication] keyWindow]; // بۆ تێست، ئەگەر Error دا وەک پێشوو چاکی دەکەین
+        [win addSubview:[[KamoProESP alloc] initWithFrame:win.bounds]];
     });
 }
