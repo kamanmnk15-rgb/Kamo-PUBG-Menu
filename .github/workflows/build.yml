@@ -26,12 +26,11 @@ jobs:
           export THEOS=~/theos
           make clean all
         
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: v${{ github.run_number }}
-          files: |
+          name: KAMO_ESP_FILE
+          path: |
+            packages/*.deb
             .theos/obj/arm64/*.dylib
             .theos/obj/arm64e/*.dylib
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
