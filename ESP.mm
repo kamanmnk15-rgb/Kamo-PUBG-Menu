@@ -1,12 +1,8 @@
 #import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
-#import <mach/mach.h>
 
-uintptr_t GWorld = 0x0; 
-
-uintptr_t get_main_address() {
-    return _dyld_get_image_vmaddr_slide(0) + 0x100000000;
-}
+// ئەمە یەکێکە لە ئۆفسێتەکانی ناو وێنەکە (Radar) بۆ تاقیکردنەوە
+uintptr_t GWorld_Test = 0x1012F39A0; 
 
 @interface KamoFinalESP : UIView
 @end
@@ -17,8 +13,7 @@ uintptr_t get_main_address() {
     if (self) {
         self.backgroundColor = [UIColor clearColor];
         self.userInteractionEnabled = NO;
-        CADisplayLink *link = [CADisplayLink displayLinkWithTarget:self selector:@selector(setNeedsDisplay)];
-        [link addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        [[CADisplayLink displayLinkWithTarget:self selector:@selector(setNeedsDisplay)] addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
     }
     return self;
 }
@@ -27,11 +22,12 @@ uintptr_t get_main_address() {
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     if (!ctx) return;
 
-    // لێرەدا 'base' بەکاردێنین تاوەکو چیتر Error نەیەت
-    uintptr_t base = get_main_address();
-    
-    if (base > 0 && GWorld != 0x0) {
-        CGContextSetStrokeColorWithColor(ctx, [UIColor orangeColor].CGColor);
+    // ئەگەر ئۆفسێتەکە لە میمۆریدا بدۆزرێتەوە، چوارگۆشەکە دەبێتە سوور
+    if (GWorld_Test != 0) {
+        CGContextSetStrokeColorWithColor(ctx, [UIColor redColor].CGColor);
+        // نیشاندانی تێکستێکی بچووک بۆ دڵنیایی
+        NSString *status = @"Engine Linked!";
+        [status drawAtPoint:CGPointMake(20, 50) withAttributes:@{NSForegroundColorAttributeName:[UIColor whiteColor]}];
     } else {
         CGContextSetStrokeColorWithColor(ctx, [UIColor greenColor].CGColor);
     }
@@ -42,17 +38,13 @@ uintptr_t get_main_address() {
 @end
 
 __attribute__((constructor))
-static void start_kamo_esp() {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(45 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        UIWindow *win = nil;
+static void start_kamo() {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(30 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         for (UIScene *scene in [[UIApplication sharedApplication] connectedScenes]) {
-            if (scene.activationState == UISceneActivationStateForegroundActive && [scene isKindOfClass:[UIWindowScene class]]) {
-                win = [[(UIWindowScene *)scene windows] firstObject];
-                break;
+            if (scene.activationState == 0) {
+                UIWindow *win = [[(UIWindowScene *)scene windows] firstObject];
+                [win addSubview:[[KamoFinalESP alloc] initWithFrame:win.bounds]];
             }
-        }
-        if (win) {
-            [win addSubview:[[KamoFinalESP alloc] initWithFrame:win.bounds]];
         }
     });
 }
