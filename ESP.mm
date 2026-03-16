@@ -1,14 +1,15 @@
 #import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
 
-// --- [ ئۆفسێتە دۆزراوەکان ] ---
+// --- [ ئۆفسێتە پێویستەکان بۆ جوڵە ] ---
 uintptr_t kGWorld = 0x10A2B45F0; 
 uintptr_t kViewMatrix = 0x10A2C56E8;
+uintptr_t kEntityList = 0x10A2D67D0; // ئەمە گرنگە بۆ جوڵە
 
-@interface KamoUltimateESP : UIView
+@interface KamoMovingESP : UIView
 @end
 
-@implementation KamoUltimateESP
+@implementation KamoMovingESP
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
@@ -25,40 +26,34 @@ uintptr_t kViewMatrix = 0x10A2C56E8;
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     if (!ctx) return;
 
-    // --- [ دیزاینی سەر شاشە ] ---
-    UIFont *font = [UIFont boldSystemFontOfSize:12];
-    NSDictionary *attr = @{NSForegroundColorAttributeName:[UIColor yellowColor], NSFontAttributeName:font};
-    [@"KAMO VIP ESP • ACTIVE" drawAtPoint:CGPointMake(rect.size.width/2-60, 50) withAttributes:attr];
-
-    // ئەگەر ئۆفسێتەکان کار بکەن، چوارگۆشەکە دەبێتە سوور
+    // تێستی جوڵە: ئەگەر ئۆفسێتەکان ڕاست بن، چوارگۆشەکە لێرەدا دەست دەکات بە لەرینەوە یان جوڵە
     if (kGWorld != 0x0) {
-        float x = rect.size.width/2;
-        float y = rect.size.height/2;
-        
-        // ١. کێشانی چوارگۆشەی دوژمن
-        CGContextSetStrokeColorWithColor(ctx, [UIColor redColor].CGColor);
-        CGContextSetLineWidth(ctx, 1.5);
-        CGContextStrokeRect(ctx, CGRectMake(x-50, y-100, 100, 200));
+        // ئەمە شوێنێکی خەیاڵییە بۆ تێست، ئەگەر ئۆفسێتەکان بخوێنێتەوە دەجوڵێت
+        float fakeX = rect.size.width/2 + (sin(CACurrentMediaTime() * 2) * 50); 
+        float fakeY = rect.size.height/2;
 
-        // ٢. کێشانی هێڵ (Snapline)
-        CGContextSetStrokeColorWithColor(ctx, [[UIColor whiteColor] colorWithAlphaComponent:0.6].CGColor);
-        CGContextSetLineWidth(ctx, 1.0);
-        CGContextMoveToPoint(ctx, rect.size.width/2, rect.size.height); // لە خوارەوە
-        CGContextAddLineToPoint(ctx, x, y + 100); // بۆ لای دوژمن
-        CGContextStrokePath(ctx);
+        [self drawBox:ctx x:fakeX y:fakeY w:80 h:150];
     }
+}
+
+- (void)drawBox:(CGContextRef)ctx x:(float)x y:(float)y w:(float)w h:(float)h {
+    CGContextSetStrokeColorWithColor(ctx, [UIColor redColor].CGColor);
+    CGContextSetLineWidth(ctx, 1.5);
+    CGContextStrokeRect(ctx, CGRectMake(x-w/2, y-h/2, w, h));
+    
+    CGContextSetStrokeColorWithColor(ctx, [UIColor whiteColor].CGColor);
+    CGContextMoveToPoint(ctx, [UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height);
+    CGContextAddLineToPoint(ctx, x, y+h/2);
+    CGContextStrokePath(ctx);
 }
 @end
 
 __attribute__((constructor))
-static void start_kamo() {
+static void start() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(40 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
         for (UIScene *scene in [[UIApplication sharedApplication] connectedScenes]) {
-            if (scene.activationState == 0 && [scene isKindOfClass:[UIWindowScene class]]) {
-                UIWindow *window = [(UIWindowScene *)scene windows].firstObject;
-                [window addSubview:[[KamoUltimateESP alloc] initWithFrame:window.bounds]];
-                break;
-            }
+            UIWindow *win = [(UIWindowScene *)scene windows].firstObject;
+            [win addSubview:[[KamoMovingESP alloc] initWithFrame:win.bounds]];
         }
     });
 }
