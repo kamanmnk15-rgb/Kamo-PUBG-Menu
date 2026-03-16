@@ -1,14 +1,13 @@
 #import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
 
-// ئەمانە نوێترین ئۆفسێتی وەشانی Global 1.8.54 ن کە لە سۆرسە جیاوازەکان وەرگیراون
+// ئۆفسێتی وەشانی Global 1.8.54
 uintptr_t kViewMatrix = 0x14F6B3D8; 
-uintptr_t kGWorld = 0x14F5A2C0;
 
-@interface KamoFinalESP : UIView
+@interface KamoFinalFix : UIView
 @end
 
-@implementation KamoFinalESP
+@implementation KamoFinalFix
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
@@ -24,28 +23,40 @@ uintptr_t kGWorld = 0x14F5A2C0;
 - (void)drawRect:(CGRect)rect {
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     
-    // نووسینی تاقیکردنەوە بە ڕەنگی سپی
-    [@"KAMO ESP • TESTING NEW OFFSETS" drawAtPoint:CGPointMake(rect.size.width/2-90, 70) withAttributes:@{NSForegroundColorAttributeName:[UIColor whiteColor], NSFontAttributeName:[UIFont boldSystemFontOfSize:10]}];
+    [@"KAMO ESP • iOS 18 READY" drawAtPoint:CGPointMake(rect.size.width/2-75, 70) withAttributes:@{NSForegroundColorAttributeName:[UIColor greenColor], NSFontAttributeName:[UIFont boldSystemFontOfSize:10]}];
 
     float midX = rect.size.width / 2;
     float midY = rect.size.height / 2;
     
-    // کێشانی چوارگۆشەیەکی پەمەیی (بۆ ئەوەی بزانیت ئەمە کۆدە نوێیەکەیە)
     CGContextSetStrokeColorWithColor(ctx, [UIColor systemPinkColor].CGColor);
     CGContextSetLineWidth(ctx, 2.0);
-    
-    // ئەگەر ئۆفسێتەکان ئیش بکەن، ئەم چوارگۆشەیە دەبێت بە پێی جوڵەی کامێرا بلەرزێت یان بجوڵێت
     CGContextStrokeRect(ctx, CGRectMake(midX-35, midY-75, 70, 150));
 }
 @end
 
+// ئەم بەشە چاککراوە بۆ ئەوەی هەڵەی keyWindow نەیەت
 __attribute__((constructor))
-static void load_kamo_final() {
-    // ٤٠ چرکە چاوەڕێ بکە تا دەچیتە ناو مەشق (Training)
+static void load_kamo_ios18() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(40 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        if (window) {
-            [window addSubview:[[KamoFinalESP alloc] initWithFrame:window.bounds]];
+        UIWindow *activeWindow = nil;
+        if (@available(iOS 13.0, *)) {
+            for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+                if (scene.activationState == UISceneActivationStateForegroundActive) {
+                    for (UIWindow *window in scene.windows) {
+                        if (window.isKeyWindow) {
+                            activeWindow = window;
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
+            activeWindow = [UIApplication sharedApplication].keyWindow;
+        }
+
+        if (activeWindow) {
+            KamoFinalFix *esp = [[KamoFinalFix alloc] initWithFrame:activeWindow.bounds];
+            [activeWindow addSubview:esp];
         }
     });
 }
