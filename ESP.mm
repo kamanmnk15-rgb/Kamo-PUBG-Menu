@@ -1,49 +1,50 @@
 #import <UIKit/UIKit.h>
 #import <mach-o/dyld.h>
 
-// ئەمە یەکێکە لە ئۆفسێتەکانی ناو وێنەکە (Radar) بۆ تاقیکردنەوە
-uintptr_t GWorld_Test = 0x1012F39A0; 
+// --- [ ئەمانە ئەو ژمارانەن کە دەبێت بیدۆزینەوە ] ---
+uintptr_t kGWorld = 0x0; 
+uintptr_t kViewMatrix = 0x0;
 
-@interface KamoFinalESP : UIView
+@interface KamoUltimateESP : UIView
 @end
 
-@implementation KamoFinalESP
+@implementation KamoUltimateESP
 - (instancetype)initWithFrame:(CGRect)frame {
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor clearColor];
         self.userInteractionEnabled = NO;
-        [[CADisplayLink displayLinkWithTarget:self selector:@selector(setNeedsDisplay)] addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+        [[CADisplayLink displayLinkWithTarget:self selector:@selector(update)] addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
     }
     return self;
 }
+
+- (void)update { [self setNeedsDisplay]; }
 
 - (void)drawRect:(CGRect)rect {
     CGContextRef ctx = UIGraphicsGetCurrentContext();
     if (!ctx) return;
 
-    // ئەگەر ئۆفسێتەکە لە میمۆریدا بدۆزرێتەوە، چوارگۆشەکە دەبێتە سوور
-    if (GWorld_Test != 0) {
-        CGContextSetStrokeColorWithColor(ctx, [UIColor redColor].CGColor);
-        // نیشاندانی تێکستێکی بچووک بۆ دڵنیایی
-        NSString *status = @"Engine Linked!";
-        [status drawAtPoint:CGPointMake(20, 50) withAttributes:@{NSForegroundColorAttributeName:[UIColor whiteColor]}];
-    } else {
-        CGContextSetStrokeColorWithColor(ctx, [UIColor greenColor].CGColor);
-    }
-
-    CGContextSetLineWidth(ctx, 2.0);
-    CGContextStrokeRect(ctx, CGRectMake(rect.size.width/2-50, rect.size.height/2-100, 100, 200));
+    // کێشانی هێڵێک لە ژێرەوە بۆ ناوەڕاست (Snapline) وەک تێست
+    CGContextSetStrokeColorWithColor(ctx, [UIColor cyanColor].CGColor);
+    CGContextSetLineWidth(ctx, 1.5);
+    CGContextMoveToPoint(ctx, rect.size.width/2, rect.size.height);
+    CGContextAddLineToPoint(ctx, rect.size.width/2, rect.size.height/2);
+    CGContextStrokePath(ctx);
+    
+    // نیشاندانی تێکست
+    [@"Kamo Engine: Waiting for Offsets..." drawAtPoint:CGPointMake(50, 50) withAttributes:@{NSForegroundColorAttributeName:[UIColor greenColor]}];
 }
 @end
 
 __attribute__((constructor))
-static void start_kamo() {
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(30 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        for (UIScene *scene in [[UIApplication sharedApplication] connectedScenes]) {
-            if (scene.activationState == 0) {
-                UIWindow *win = [[(UIWindowScene *)scene windows] firstObject];
-                [win addSubview:[[KamoFinalESP alloc] initWithFrame:win.bounds]];
+static void init_kamo() {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(35 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        for (UIWindowScene* scene in [[UIApplication sharedApplication] connectedScenes]) {
+            if (scene.activationState == UISceneActivationStateForegroundActive) {
+                UIWindow *win = [scene windows].firstObject;
+                [win addSubview:[[KamoUltimateESP alloc] initWithFrame:win.bounds]];
+                break;
             }
         }
     });
